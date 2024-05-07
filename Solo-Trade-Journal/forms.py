@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, EmailField, SubmitField
-from wtforms.validators import  InputRequired
+from wtforms.validators import InputRequired
 
 class SignUpForm (FlaskForm):
     name = StringField('Name:', validators=[InputRequired()])
