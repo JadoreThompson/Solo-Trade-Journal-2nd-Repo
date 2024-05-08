@@ -48,6 +48,15 @@
     .chart{
         width: 100%;
         height: 100%;
+        overflow: hidden;
+    }
+
+    .card-text{
+        padding: 10px;
+    }
+
+    .chart-container{
+        height: 80%;
     }
 
     #chart{
@@ -99,16 +108,15 @@
                 <h4><b>Equity Growth</b></h4>
             </div>
             <div class="chart">
-                <canvas id="myChart"></canvas>
+                <div class="chart-container">
+                    <canvas id="myChart"></canvas>
+                </div>
             </div>
         </div>
         <div class="stat-card all-card">
             <div class="card-text">
-                <h4><b>John Doe</b></h4>
-                <p>Architect & Engineer</p>
-            </div>
-            <div class="chart" id="chart-container">
-                <img src="img_avatar.png" alt="Avatar" style="width:100%">
+                <h4><b>Statistics</b></h4>
+
             </div>
         </div>
     </div>
@@ -126,7 +134,7 @@
 
 <!-- Scripting Area -->
 <script>
-
+    // EQUITY GROWTH CHART
     const ctx = document.getElementById('myChart')
     const today = new Date();
     const currentMonth = today.getMonth() + 1;
@@ -152,6 +160,7 @@
       }]
     },
     options: {
+        //maintainAspectRatio: false,
         scales: {
             x: {
                 grid: {
@@ -168,5 +177,5 @@
   });
 </script>
 
-#
+
 {% endblock %}

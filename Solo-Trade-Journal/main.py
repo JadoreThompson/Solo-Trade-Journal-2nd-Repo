@@ -3,8 +3,8 @@ from forms import LoginForm, SignUpForm
 from flask_sqlalchemy import SQLAlchemy
 import base64
 import requests
-
-
+import pprint
+from requests_toolbelt.utils import dump
 
 # App Initialisation
 app = Flask(__name__)
@@ -15,12 +15,14 @@ db = SQLAlchemy()
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///User.db"
 db.init_app(app)
 
+
 # Defining the table(s)
 class Users(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, unique=False, nullable=False)
     email = db.Column(db.String, unique=True, nullable=False)
     password = db.Column(db.String, unique=False, nullable=False)
+
 
 class TradingAccounts(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -35,9 +37,9 @@ class TradingAccounts(db.Model):
     # Relationship between tables
     user = db.relationship('Users', backref=db.backref('trading_accounts', lazy=True))
 
+
 with app.app_context():
     db.create_all()
-
 
 # TradeSync API
 base_url = "https://api.tradesync.io/"
@@ -48,12 +50,16 @@ credentials = f"{apikey}:{secretkey}"
 
 encoded = base64.b64encode(credentials.encode()).decode()
 
-
 header = {
     "Authorization": f"Basic {encoded}",
     "Content-Type": 'application/json'  # Fixed typo here
 }
 
+
+# DUMPING REQUESTS
+def dump_requests(response):
+    data = dump.dump_all(response)
+    print(data.decode('utf-8'))
 
 # VIEWS
 @app.route('/')
@@ -122,7 +128,6 @@ def accounts():
             mt_version = request.form['mt-version']
             server = request.form['server']
 
-
             print(name)
             print(account_number)
             print(password)
@@ -175,10 +180,10 @@ def accounts():
                     broker_server=server,
                     mt_version=mt_version
                 )
-#
+
                 db.session.add(newTradingAccount)
                 db.session.commit()
-                #return user to the page with the account table
+                # Return user to the page with the account table
 
                 user_id = session['user_id']
                 user_accounts = TradingAccounts.query.filter_by(user_id=user_id).all()
@@ -192,15 +197,78 @@ def accounts():
                 error_messgae = "Try again"
                 return error_messgae
 
-
-
-
         user_id = session['user_id']
         user_accounts = TradingAccounts.query.filter_by(user_id=user_id).all()
         return render_template('accounts.html', user_accounts=user_accounts)
 
+
 @app.route('/dashboard')
 def dashboard():
+    if 'user_id' not in session:
+        return redirect('/login')
+    else:
+        user_id = ['user_id']
+
+        # Grabbing the account ID from the link the user pressed from the account table
+        account_id0 = request.args.get('account_id')
+        print(account_id0)  # Printing it to the console
+
+        # Getting all accounts
+        endpoint = "accounts"
+        url = base_url + endpoint
+        print(f"URL: {url}")
+        response = requests.get(url, headers=header)
+        data = response.json()
+        print(data)
+
+        # Filtering through the DB
+
+        account = TradingAccounts.query.filter_by(id=account_id0, user_id=session['user_id']).first()
+        print(f"Account: {account}")
+        accountLogin = account.account_login
+        print(f"Login: {accountLogin}")
+
+        data = {
+            "account_number": accountLogin
+        }
+
+        response = requests.get(url, headers=header, json=data)
+        data = response.json()
+        print(f"Response Data:{data}") # prints the json
+
+        allAccData = data['data']
+        print(f"All Acc Data:")
+        pp = pprint.PrettyPrinter(width=41, compact=True)
+        pp.pprint(data)
+
+        new_data = data['data']
+        print(f"New Data:")
+        pp = pprint.PrettyPrinter(width=41, compact=True)
+        pp.pprint(new_data)
+
+        # Account Name
+        account_name = account.name
+        print(f"Account Name: {account_name}")
+
+        for entry in new_data:
+            account_name = entry.get('account_name')  # Get the value associated with the key 'account_name'
+            if account_name == account.name:  # Check if 'account_name' matches the name of the account object
+                print(entry)
+
+        acc_id = entry['id']
+        print(f"ID: {acc_id}")
+
+        endpoint = f"/analyses/{acc_id}/days"
+        url = base_url + endpoint
+
+        response = requests.get(url, headers=header)
+        dump_requests(response)
+
+        data = response.json()
+        print(data)
+
+        # filtered_content = [broker_id for broker_id in data['data'] if broker_id['name'] == server]
+
     return render_template('dashboard.html')
 
 
