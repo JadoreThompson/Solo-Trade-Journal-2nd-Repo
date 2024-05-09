@@ -73,6 +73,11 @@
         width: calc(100% - 10px);
         height: 400px;
     }
+
+    .7d-pnl-value{
+        font-size: 20px;
+        color: blue;
+    }
 </style>
 
 <div class="container">
@@ -80,20 +85,23 @@
         <div class="pnl-card card all-card">
             <div class="chart-text">
                 <h4><b>7d PnL</b></h4>
+                <p>{{ weekly_profit }}</p>
             </div>
             <div id="chart"></div>
 
         </div>
         <div class="card all-card">
             <div class="chart-text">
-                <h4><b>7d PnL</b></h4>
+                <h4><b>Balance: </b></h4>
+                <p>{{ account_balance }}</p>
             </div>
             <div class="chart">
             </div>
         </div>
         <div class="card all-card">
             <div class="chart-text">
-                <h4><b>7d PnL</b></h4>
+                <h4><b>Total Profit</b></h4>
+                <p>{{ total_profit }}</p>
             </div>
             <div class="chart">
                 <img src="img_avatar.png" alt="Avatar" style="width:100%">
@@ -116,7 +124,42 @@
         <div class="stat-card all-card">
             <div class="card-text">
                 <h4><b>Statistics</b></h4>
+                <br>
+                <style>
+                    .stat-element{
+                        padding: 0;
+                        margin: 0;
+                    }
 
+                    .stat-elements{
+                        width: 100%;
+                        display: flex;
+                        flex-direction: row;
+                        justify-content: space-between;
+                    }
+
+                    .stat-title{
+
+                    }
+
+                    .stat-value{
+
+                    }
+                </style>
+                <div class="stat-elements">
+                    <div class="stat-title stat-element">
+                        <p>Account Size:</p>
+                        <p>Broker:</p>
+                        <p>Account Size:</p>
+                        <p>Account Size:</p>
+                    </div>
+                    <div class="stat-value stat-element">
+                        <p>{{ account_size }}</p>
+                        <p>{{ broker }}</p>
+                        <p>{{ platform }}</p>
+                        <p>Account Size:</p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -126,7 +169,38 @@
             <div class="card-text">
                 <h4><b>History Table</b></h4>
             </div>
+            <style>
+                table, th, td{
+                    border: 1px solid black;
+                }
 
+                table{
+                    width: 80%;
+                    border-radius: 5px;
+
+                }
+            </style>
+
+            <table style="width: 100%">
+                <thead>
+                  <tr>
+                    <th>Time</th>
+                    <th>Symbol</th>
+                    <th>Lots</th>
+                    <th>Type</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for trade in trades_list %}
+                  <tr>
+                    <td>{{ trade.open_time }}</td>
+                    <td>{{ trade.symbol }}</td>
+                    <td>{{ trade.lots }}</td>
+                    <td>{{ trade.type }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+          </table>
         </div>
     </div>
 </div>
@@ -137,7 +211,7 @@
     // EQUITY GROWTH CHART
     const ctx = document.getElementById('myChart')
     const today = new Date();
-    const currentMonth = today.getMonth() + 1;
+    const currentMonth = today.getMonth() - 1;
     const months = ['January', 'February', 'March',
         'April', 'May', 'June', 'July', 'August',
         'September', 'August', 'September', 'October',
@@ -147,34 +221,67 @@
     for (let i = 0; i < 3; i++) {
         const monthIndex = (currentMonth - i + 12) % 12; // Handling wraparound for previous year
         labels.unshift(months[monthIndex]);
+        let growthForMonth = 0; // Defualt growth value
+        for (const date of monthly_list){
+            const dateMonth = new Date (entry['date']).getMonth();
+        if (entryMonth === monthIndex) {
+            growthForMonth += entry['growth']; // Add growth value for the month
+        }
+        monthGrowth.unshift(growthForMonth); // Push total growth for the month
     }
 
+
     new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: labels,
-      datasets: [{
-        label: '',
-        data: [12, 19, 3, 5, 2, 3],
-        borderWidth: 1
-      }]
-    },
-    options: {
-        //maintainAspectRatio: false,
-        scales: {
-            x: {
-                grid: {
-                    display: false //Hides grid lines on x-axis
-                }
-            },
-            y: {
-                grid: {
-                    display: false
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: '',
+            data: monthGrowth,
+            borderWidth: 1
+          }]
+        },
+        options: {
+            //maintainAspectRatio: false,
+            scales: {
+                x: {
+                    grid: {
+                        display: false //Hides grid lines on x-axis
+                    }
+                },
+                y: {
+                    grid: {
+                        display: false
+                    }
                 }
             }
         }
+    });
+
+
+
+    const data = {
+      labels: [
+        'Red',
+        'Blue',
+        'Yellow'
+      ],
+      datasets: [{
+        label: 'My First Dataset',
+        data: [300, 50, 100],
+        backgroundColor: [
+          'rgb(255, 99, 132)',
+          'rgb(54, 162, 235)',
+          'rgb(255, 205, 86)'
+        ],
+        hoverOffset: 4
+      }]
+    };
+
+    const config = {
+        type: 'doughnut',
+        data: data,
     }
-  });
 </script>
 
 

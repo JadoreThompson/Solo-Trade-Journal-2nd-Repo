@@ -253,23 +253,101 @@ def dashboard():
         for entry in new_data:
             account_name = entry.get('account_name')  # Get the value associated with the key 'account_name'
             if account_name == account.name:  # Check if 'account_name' matches the name of the account object
-                print(entry)
+                print(f"Entry is: {entry}")
 
         acc_id = entry['id']
         print(f"ID: {acc_id}")
 
-        endpoint = f"/analyses/{acc_id}/days"
+        weekly_profit = entry['weekly_profit']
+        print("Weekly Profit:", weekly_profit)
+
+        account_balance = entry['balance']
+        print("Balance:", account_balance)
+
+        total_profit = entry['total_profit']
+
+
+        endpoint = f"analyses"
         url = base_url + endpoint
-
-        response = requests.get(url, headers=header)
-        dump_requests(response)
-
+        response = requests.get(url,headers=header)
         data = response.json()
         print(data)
 
+
+        entry = data.get('data')
+        print("Entry:",entry)
+        account_size = entry[0]['total_deposits']
+        print("total deposits", account_size)
+
+        broker = new_data[0]['broker']
+        print("Broker:", broker)
+
+        platform = new_data[0]['mt_version']
+
+
+
+        # All of the user's trades
+        endpoint = f"trades"
+        url = base_url + endpoint
+        response = requests.get(url, headers=header)
+        data = response.json()
+        pp = pprint.PrettyPrinter(width=41, compact=True)
+        print("Trades")
+        pp.pprint(data)
+
+        trades_data = data['data']
+
+        # List to store trade dictionaries
+        trades_list = []
+
+        # Iterating over trades data and extracting required information
+        for trade in trades_data:
+            # Ignoring deposit transactions
+            if trade['type'] != 'deposit':
+                trade_info = {
+                    'open_time': trade['open_time'],
+                    'symbol': trade['symbol'],
+                    'lots': trade['lots'],
+                    'type': trade['type']
+                }
+                trades_list.append(trade_info)
+
+        # Printing the list of trade dictionaries
+        #print("Trades",trades_list)
+        pp = pprint.PrettyPrinter(width=41,compact=True)
+        pp.pprint(trades_list)
+
+
+        # Monthly Analysis
+        endpoint = f"analyses/{acc_id}/monthlies"
+        url = base_url + endpoint
+        response = requests.get(url, headers=header)
+        data = response.json()
+        print("Monthly data")
+        pp = pprint.PrettyPrinter(width=41, compact=True)
+        pp.pprint(data)
+
+
+
+        # Iterating over data and extracting required information
+        monthly_list = []
+        for entry in data['data']:
+            data_info = {
+                'date': entry['date'],
+                'growth': entry['growth'],
+            }
+            monthly_list.append(data_info)
+
+        # Printing the list of data dictionaries
+        print("Data list:",monthly_list)
+
+
         # filtered_content = [broker_id for broker_id in data['data'] if broker_id['name'] == server]
 
-    return render_template('dashboard.html')
+    return render_template('dashboard.html', weekly_profit=weekly_profit,
+                           account_balance=account_balance, total_profit=total_profit,
+                           account_size=account_size, broker=broker, platform=platform,
+                           trades_list=trades_list, monthly_list=monthly_list)
 
 
 if __name__ == '__main__':
