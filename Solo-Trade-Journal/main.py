@@ -212,7 +212,7 @@ def dashboard():
     if 'user_id' not in session:
         return redirect('/login')
     else:
-        user_id = ['user_id']
+        user_id = session['user_id']
 
         # Grabbing the account ID from the link the user pressed from the account table
         account_id1 = int(request.args.get('account_id'))
@@ -283,14 +283,14 @@ def dashboard():
         account_size = entry[0]['total_deposits']
         print("total deposits", account_size)
 
-        broker = new_data[0]['broker']
-        print("Broker:", broker)
+        # broker = new_data[0]['broker']
+        #print("Broker:", broker)
 
         platform = new_data[0]['mt_version']
 
 
 
-        # All of the user's trades
+                        # All of the user's trades
         endpoint = f"trades"
         url = base_url + endpoint
         response = requests.get(url, headers=header)
@@ -362,7 +362,7 @@ def dashboard():
 
     return render_template('dashboard.html', weekly_profit=weekly_profit,
                            account_balance=account_balance, total_profit=total_profit,
-                           account_size=account_size, broker=broker, platform=platform,
+                           account_size=account_size, platform=platform,
                            trades_list=trades_list, monthly_list=monthly_list)
 
 
