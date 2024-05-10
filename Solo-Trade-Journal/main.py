@@ -1,10 +1,15 @@
-from flask import Flask, render_template, request, url_for, redirect, session
+from flask import Flask, render_template, request, url_for, redirect, session, jsonify
 from forms import LoginForm, SignUpForm
 from flask_sqlalchemy import SQLAlchemy
+from requests_toolbelt.utils import dump
+from datetime import datetime
+from dateutil import tz
 import base64
 import requests
 import pprint
-from requests_toolbelt.utils import dump
+import json
+
+
 
 # App Initialisation
 app = Flask(__name__)
@@ -210,8 +215,7 @@ def dashboard():
         user_id = ['user_id']
 
         # Grabbing the account ID from the link the user pressed from the account table
-        account_id0 = request.args.get('account_id')
-        print(account_id0)  # Printing it to the console
+        account_id1 = int(request.args.get('account_id'))
 
         # Getting all accounts
         endpoint = "accounts"
@@ -223,7 +227,7 @@ def dashboard():
 
         # Filtering through the DB
 
-        account = TradingAccounts.query.filter_by(id=account_id0, user_id=session['user_id']).first()
+        account = TradingAccounts.query.filter_by(id=account_id1, user_id=session['user_id']).first()
         print(f"Account: {account}")
         accountLogin = account.account_login
         print(f"Login: {accountLogin}")
@@ -269,7 +273,7 @@ def dashboard():
 
         endpoint = f"analyses"
         url = base_url + endpoint
-        response = requests.get(url,headers=header)
+        response = requests.get(url, headers=header)
         data = response.json()
         print(data)
 
@@ -332,14 +336,26 @@ def dashboard():
         # Iterating over data and extracting required information
         monthly_list = []
         for entry in data['data']:
+            time_string = entry['date']
+            dt = datetime.strptime(time_string, "%Y-%m-%d")
+            dt = dt.replace(tzinfo=tz.gettz('UTC'))
+            unix_timestamp = dt.timestamp()
+
             data_info = {
-                'date': entry['date'],
+                'date': unix_timestamp,
                 'growth': entry['growth'],
             }
             monthly_list.append(data_info)
 
         # Printing the list of data dictionaries
-        print("Data list:",monthly_list)
+        print("Data list:", monthly_list)
+        monthly_list_json = json.dumps(monthly_list)
+        # Writing the data to a JSON file
+        with open('monthly_data.json', 'w') as f:
+            f.write(monthly_list_json)
+
+
+
 
 
         # filtered_content = [broker_id for broker_id in data['data'] if broker_id['name'] == server]
@@ -348,6 +364,24 @@ def dashboard():
                            account_balance=account_balance, total_profit=total_profit,
                            account_size=account_size, broker=broker, platform=platform,
                            trades_list=trades_list, monthly_list=monthly_list)
+
+
+
+@app.route('/delete_account/<account_id>', methods=['DELETE'])
+def delete_account(account_id):
+    try:
+        # Get the account
+        account = TradingAccounts.query.get(account_id)
+        if account:
+            # Delete the account
+            db.session.delete(account)
+            db.session.commit()
+            return jsonify(success=True)
+        else:
+            return jsonify(success=False, error='Account not found.')
+    except Exception as e:
+        return jsonify(success=False, error=str(e))
+
 
 
 if __name__ == '__main__':
