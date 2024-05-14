@@ -391,37 +391,29 @@ def copytrading():
 
         master_account = request.form['master-account']
         slave_account = request.form['slave-account']
+        risk_type = request.form['risk-type']
+        risk_value = request.form['risk-value']
 
-        print("Trading Accounts: ", trading_accounts)
-        print(master_account)
-        print(slave_account)
-
-        # Getting the account ID
-        endpoint = "accounts"
-        url = base_url + endpoint
-
-        response = requests.get(url, headers=header)
-        data = response.json()
-
-        shortened_data = data['data']
-
-        print("Data: ", data)
-        print("Shortened Data:", shortened_data)
-
+        if master_account == slave_account:
+            error_message = "Can't be the same account"
+            return render_template('copy_trading.html', error_message=error_message)
 
         # Creating the copier
         endpoint = "copiers"
         url = base_url + endpoint
-
         body = {
-            "lead_id": 6159,
-            "follower_id": 6167,
-            "risk_type": "2",
-            "risk-value": 1,
+            "lead_id": master_account,
+            "follower_id": slave_account,
+            "risk_type": risk_type,
+            "risk_value": risk_value,
         }
-        response = requests.post(url, headers=header)
+        response = requests.post(url, headers=header, json=body)
+        data = response.json()
+        print(data)
 
         return redirect('/dashboard')
+
+
     trading_accounts = TradingAccounts.query.filter_by(user_id=session['user_id']).all()
     return render_template('copy_trading.html', trading_accounts=trading_accounts)
 
