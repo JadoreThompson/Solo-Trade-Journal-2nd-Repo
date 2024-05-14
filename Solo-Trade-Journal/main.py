@@ -384,5 +384,56 @@ def delete_account(account_id):
 
 
 
+@app.route('/copy-trading', methods=['POST', 'GET'])
+def copytrading():
+    if request.method == "POST":
+        trading_accounts = TradingAccounts.query.filter_by(user_id=session['user_id']).all()
+
+        master_account = request.form['master-account']
+        slave_account = request.form['slave-account']
+
+        print("Trading Accounts: ", trading_accounts)
+        print(master_account)
+        print(slave_account)
+
+        # Getting the account ID
+        endpoint = "accounts"
+        url = base_url + endpoint
+
+        response = requests.get(url, headers=header)
+        data = response.json()
+
+        shortened_data = data['data']
+
+        print("Data: ", data)
+        print("Shortened Data:", shortened_data)
+
+
+        # Creating the copier
+        endpoint = "copiers"
+        url = base_url + endpoint
+
+        body = {
+            "lead_id": 6159,
+            "follower_id": 6167,
+            "risk_type": "2",
+            "risk-value": 1,
+        }
+        response = requests.post(url, headers=header)
+
+        return redirect('/dashboard')
+    trading_accounts = TradingAccounts.query.filter_by(user_id=session['user_id']).all()
+    return render_template('copy_trading.html', trading_accounts=trading_accounts)
+
+"""
+@app.route('/submit-copy', methods=['POST', 'GET'])
+def submitCopy():
+    masteraccount = request.form['master-account']
+    print(masteraccount)
+    slaveaccount = request.form['slave-account']
+    print(slaveaccount)
+    return render_template('dashboard.html')
+"""
+
 if __name__ == '__main__':
     app.run(debug=True)
