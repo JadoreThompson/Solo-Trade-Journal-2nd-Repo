@@ -77,8 +77,8 @@ def login():
     page_title = "Log-In"
 
     if request.method == "POST":
-        email = request.form["email"]
-        password = request.form["password"]
+        email = request.form['email']
+        password = request.form['password']
         user = Users.query.filter_by(email=email).first()
 
         if user:
@@ -207,7 +207,7 @@ def accounts():
         return render_template('accounts.html', user_accounts=user_accounts)
 
 
-@app.route('/dashboard')
+@app.route('/dashboard', methods=['POST', 'GET'])
 def dashboard():
     if 'user_id' not in session:
         return redirect('/login')
@@ -215,7 +215,7 @@ def dashboard():
         user_id = session['user_id']
 
         # Grabbing the account ID from the link the user pressed from the account table
-        account_id1 = int(request.args.get('account_id'))
+        account_id1 = int(request.form.get('account_id'))
 
         # Getting all accounts
         endpoint = "accounts"
@@ -386,6 +386,10 @@ def delete_account(account_id):
 
 @app.route('/copy-trading', methods=['POST', 'GET'])
 def copytrading():
+    error_message = None
+    master_account = None
+    slave_account = None
+
     if request.method == "POST":
         trading_accounts = TradingAccounts.query.filter_by(user_id=session['user_id']).all()
 
@@ -396,7 +400,9 @@ def copytrading():
 
         if master_account == slave_account:
             error_message = "Can't be the same account"
-            return render_template('copy_trading.html', error_message=error_message)
+            return render_template('copy_trading.html',
+                                   error_message=error_message, master_account=master_account,
+                                   slave_account=slave_account, trading_accounts=trading_accounts)
 
         # Creating the copier
         endpoint = "copiers"
@@ -409,13 +415,15 @@ def copytrading():
         }
         response = requests.post(url, headers=header, json=body)
         data = response.json()
-        print(data)
+        print("Data: \n", data)
 
         return redirect('/dashboard')
 
 
     trading_accounts = TradingAccounts.query.filter_by(user_id=session['user_id']).all()
-    return render_template('copy_trading.html', trading_accounts=trading_accounts)
+    return render_template('copy_trading.html', trading_accounts=trading_accounts,
+                           error_message=error_message, master_account=master_account,
+                           slave_account=slave_account)
 
 """
 @app.route('/submit-copy', methods=['POST', 'GET'])
