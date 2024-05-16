@@ -240,6 +240,9 @@ def dashboard():
         # Grabbing the account ID from the link the user pressed from the account table
         account_id1 = int(request.args.get('account_id'))
 
+        # Storing the account id in the session
+        session['account_id'] = account_id1
+
         # Getting all accounts
         endpoint = "accounts"
         url = base_url + endpoint
@@ -463,35 +466,44 @@ def submitCopy():
 
 @app.route('/analysis')
 def analysis():
-                # All of the user's trades
-    endpoint = f"trades"
-    url = base_url + endpoint
-    response = requests.get(url, headers=header)
-    data = response.json()
-    pp = pprint.PrettyPrinter(width=41, compact=True)
-    print("Trades")
-    pp.pprint(data)
+    if 'user_id' not in session:
+        return redirect('/login')
+    else:
+        user_id = session['user_id']
 
-    trades_data = data['data']
+        # Grabbing the account ID from the link the user pressed from the account table
+        account_id = session['account_id']
+        print("Analysis Page Account ID:", account_id)
+
+                    # All of the user's trades
+        endpoint = f"trades"
+        url = base_url + endpoint
+        response = requests.get(url, headers=header)
+        data = response.json()
+        pp = pprint.PrettyPrinter(width=41, compact=True)
+        print("Trades")
+        pp.pprint(data)
+
+        trades_data = data['data']
 
 
-    trades_list = []
+        trades_list = []
 
-                # Iterating over trades data and extracting required information
-    for trade in trades_data:
-        # Ignoring deposit transactions
-        if trade['type'] != 'deposit':
-            trade_info = {
-                'day': convertToDay(trade['open_time']),
-                'open_time': convertToTime(trade['open_time']),
-                'symbol': trade['symbol'],
-                'lots': trade['lots'],
-                'type': trade['type'],
-                'rr': calcRiskReward(trade['open_price'], trade['stop_loss'], trade['take_profit']),
-                'profit': trade['profit'],
-                'tags': None
-            }
-            trades_list.append(trade_info)
+                    # Iterating over trades data and extracting required information
+        for trade in trades_data:
+            # Ignoring deposit transactions
+            if trade['type'] != 'deposit':
+                trade_info = {
+                    'day': convertToDay(trade['open_time']),
+                    'open_time': convertToTime(trade['open_time']),
+                    'symbol': trade['symbol'],
+                    'lots': trade['lots'],
+                    'type': trade['type'],
+                    'rr': calcRiskReward(trade['open_price'], trade['stop_loss'], trade['take_profit']),
+                    'profit': trade['profit'],
+                    'tags': None
+                }
+                trades_list.append(trade_info)
 
     return render_template('analysis.html', trades_list=trades_list)
 
