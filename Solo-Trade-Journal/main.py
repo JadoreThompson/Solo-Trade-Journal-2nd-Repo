@@ -81,6 +81,13 @@ def convertToDay(date_str):
     day_of_week = date_obj.strftime('%A')
     return day_of_week
 
+def convertToTime(date_str):
+    # Parse the datetime string into a datetime object
+    date_obj = datetime.strptime(date_str, '%Y-%m-%dT%H:%M:%SZ')
+    # Get the time of the day (e.g., '12:00')
+    time_of_day = date_obj.strftime('%H:%M')
+    return time_of_day
+
 
 # VIEWS
 @app.route('/')
@@ -475,11 +482,13 @@ def analysis():
         # Ignoring deposit transactions
         if trade['type'] != 'deposit':
             trade_info = {
-                'open_time': convertToDay(trade ['open_time']),
+                'day': convertToDay(trade['open_time']),
+                'open_time': convertToTime(trade['open_time']),
                 'symbol': trade['symbol'],
                 'lots': trade['lots'],
                 'type': trade['type'],
-                'rr': calcRiskReward(trade['open_price'], trade['stop_loss'], trade['take_profit'])
+                'rr': calcRiskReward(trade['open_price'], trade['stop_loss'], trade['take_profit']),
+                'tags': None
             }
             trades_list.append(trade_info)
 

@@ -22,7 +22,7 @@
     <div class="card-container">
         <div class="card">
             <div class="card-title">
-                <span>All Trades</span>
+                <input type="text" id="myInput" onkeyup="myFunction()" placeholder="Enter Filter...">
             </div>
             <div class="card-body">
                 <table>
@@ -30,21 +30,23 @@
                     <tr>
                         <th>Day</th>
                         <th>RR</th>
-                        <th>Time</th>
+                        <th>Open Time</th>
                         <th>Type</th>
                         <th>Symbol</th>
                         <th>Lots</th>
+                        <th>Tags</th>
                     </tr>
                     </thead>
                     <tbody>
                     {% for trade in trades_list %}
                         <tr>
-                            <td>{{ trade.open_time }}</td>
+                            <td>{{ trade.day }}</td>
                             <td>{{ trade.rr }}</td>
                             <td>{{ trade.open_time }}</td>
                             <td>{{ trade.type }}</td>
                             <td>{{ trade.symbol }}</td>
                             <td>{{ trade.lots }}</td>
+                            <td>{{ trade.tags }}</td>
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -55,20 +57,22 @@
     <style>
         .main-container {
             display: flex;
-            justify-content: center;
-            align-items: center;
+
             height: 100vh; /* Full height of the viewport */
-            background-color: #F5F5F5;
+            background-color: blue;
         }
 
         .card-container {
-            padding: 20px;
-            background-color: white;
+            background-color: red;
+            margin: 10px;
+            width: 100%;
         }
 
         .card {
             background-color: white;
             display: flex;
+            padding: 10px;
+            margin: 10px;
         }
 
         .card-title {
@@ -78,7 +82,35 @@
         .card-body {
             width: 100%;
         }
+
+        table {
+            width: 100%;
+            text-align: center;
+        }
     </style>
+    <script>
+        function myFunction() {
+          // Declare variables
+          var input, filter, table, tr, td, i, txtValue;
+          input = document.getElementById("myInput");
+          filter = input.value.toUpperCase();
+          table = document.getElementsByTagName("table")[0];
+          tr = table.getElementsByTagName("tr");
+
+          // Loop through all table rows, and hide those who don't match the search query
+          for (i = 0; i < tr.length; i++) {
+            td = tr[i].getElementsByTagName("td")[0];
+            if (td) {
+              txtValue = td.textContent || td.innerText;
+              if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                tr[i].style.display = "";
+              } else {
+                tr[i].style.display = "none";
+              }
+            }
+          }
+        }
+    </script>
 </div>
 
 </body>
