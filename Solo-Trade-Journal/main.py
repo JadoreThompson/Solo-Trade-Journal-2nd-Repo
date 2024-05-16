@@ -488,6 +488,7 @@ def analysis():
                 'lots': trade['lots'],
                 'type': trade['type'],
                 'rr': calcRiskReward(trade['open_price'], trade['stop_loss'], trade['take_profit']),
+                'profit': trade['profit'],
                 'tags': None
             }
             trades_list.append(trade_info)
