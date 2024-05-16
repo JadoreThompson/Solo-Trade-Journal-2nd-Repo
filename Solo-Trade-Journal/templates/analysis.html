@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title }}</title>
+</head>
+<body>
+<!-- Header -->
+<div class="header">
+    <style>
+        .header{
+            width: 100%;
+            height: 150px;
+        }
+    </style>
+</div>
+<!-- Header End -->
+
+<!-- Main Content -->
+<div class="main-container">
+    <div class="card-container">
+        <div class="card">
+            <div class="card-title">
+                <span>All Trades</span>
+            </div>
+            <div class="card-body">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Day</th>
+                        <th>RR</th>
+                        <th>Time</th>
+                        <th>Type</th>
+                        <th>Symbol</th>
+                        <th>Lots</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for trade in trades_list %}
+                        <tr>
+                            <td>{{ trade.open_time }}</td>
+                            <td>{{ trade.rr }}</td>
+                            <td>{{ trade.open_time }}</td>
+                            <td>{{ trade.type }}</td>
+                            <td>{{ trade.symbol }}</td>
+                            <td>{{ trade.lots }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <style>
+        .main-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh; /* Full height of the viewport */
+            background-color: #F5F5F5;
+        }
+
+        .card-container {
+            padding: 20px;
+            background-color: white;
+        }
+
+        .card {
+            background-color: white;
+            display: flex;
+        }
+
+        .card-title {
+            width: 100%;
+        }
+
+        .card-body {
+            width: 100%;
+        }
+    </style>
+</div>
+
+</body>
+</html>

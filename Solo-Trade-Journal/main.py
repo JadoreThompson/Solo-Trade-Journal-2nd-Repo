@@ -66,6 +66,22 @@ def dump_requests(response):
     data = dump.dump_all(response)
     print(data.decode('utf-8'))
 
+
+def calcRiskReward(open_price, stop_loss, take_profit):
+    risk = open_price - stop_loss
+    reward = take_profit - open_price
+    risk_reward_ratio = reward / risk
+    return round(risk_reward_ratio, 2)
+
+
+def convertToDay(date_str):
+    # Parse the datetime string into a datetime object
+    date_obj = datetime.strptime(date_str, '%Y-%m-%dT%H:%M:%SZ')
+    # Get the day of the week (e.g., 'Monday')
+    day_of_week = date_obj.strftime('%A')
+    return day_of_week
+
+
 # VIEWS
 @app.route('/')
 def index():
@@ -77,8 +93,8 @@ def login():
     page_title = "Log-In"
 
     if request.method == "POST":
-        email = request.form["email"]
-        password = request.form["password"]
+        email = request.form['email']
+        password = request.form['password']
         user = Users.query.filter_by(email=email).first()
 
         if user:
@@ -199,15 +215,15 @@ def accounts():
                 return render_template('accounts.html', user_accounts=user_accounts)
 
             else:
-                error_messgae = "Try again"
-                return error_messgae
+                error_message = "Try again"
+                return error_message
 
         user_id = session['user_id']
         user_accounts = TradingAccounts.query.filter_by(user_id=user_id).all()
         return render_template('accounts.html', user_accounts=user_accounts)
 
 
-@app.route('/dashboard')
+@app.route('/dashboard', methods=['POST', 'GET'])
 def dashboard():
     if 'user_id' not in session:
         return redirect('/login')
@@ -301,18 +317,20 @@ def dashboard():
 
         trades_data = data['data']
 
-        # List to store trade dictionaries
+                    # List to store trade dictionaries
         trades_list = []
 
         # Iterating over trades data and extracting required information
         for trade in trades_data:
             # Ignoring deposit transactions
             if trade['type'] != 'deposit':
+
                 trade_info = {
                     'open_time': trade['open_time'],
                     'symbol': trade['symbol'],
                     'lots': trade['lots'],
-                    'type': trade['type']
+                    'type': trade['type'],
+                    'rr': calcRiskReward(trade['open_price'], trade['stop_loss'], trade['take_profit'])
                 }
                 trades_list.append(trade_info)
 
@@ -382,6 +400,90 @@ def delete_account(account_id):
     except Exception as e:
         return jsonify(success=False, error=str(e))
 
+
+
+@app.route('/copy-trading', methods=['POST', 'GET'])
+def copytrading():
+    error_message = None
+    master_account = None
+    slave_account = None
+
+    if request.method == "POST":
+        trading_accounts = TradingAccounts.query.filter_by(user_id=session['user_id']).all()
+
+        master_account = request.form['master-account']
+        slave_account = request.form['slave-account']
+        risk_type = request.form['risk-type']
+        risk_value = request.form['risk-value']
+
+        if master_account == slave_account:
+            error_message = "Can't be the same account"
+            return render_template('copy_trading.html',
+                                   error_message=error_message, master_account=master_account,
+                                   slave_account=slave_account, trading_accounts=trading_accounts)
+
+        # Creating the copier
+        endpoint = "copiers"
+        url = base_url + endpoint
+        body = {
+            "lead_id": master_account,
+            "follower_id": slave_account,
+            "risk_type": risk_type,
+            "risk_value": risk_value,
+        }
+        response = requests.post(url, headers=header, json=body)
+        data = response.json()
+        print("Data: \n", data)
+
+        return redirect('/dashboard')
+
+
+    trading_accounts = TradingAccounts.query.filter_by(user_id=session['user_id']).all()
+    return render_template('copy_trading.html', trading_accounts=trading_accounts,
+                           error_message=error_message, master_account=master_account,
+                           slave_account=slave_account)
+
+"""
+@app.route('/submit-copy', methods=['POST', 'GET'])
+def submitCopy():
+    masteraccount = request.form['master-account']
+    print(masteraccount)
+    slaveaccount = request.form['slave-account']
+    print(slaveaccount)
+    return render_template('dashboard.html')
+"""
+
+
+@app.route('/analysis')
+def analysis():
+                # All of the user's trades
+    endpoint = f"trades"
+    url = base_url + endpoint
+    response = requests.get(url, headers=header)
+    data = response.json()
+    pp = pprint.PrettyPrinter(width=41, compact=True)
+    print("Trades")
+    pp.pprint(data)
+
+    trades_data = data['data']
+
+
+    trades_list = []
+
+                # Iterating over trades data and extracting required information
+    for trade in trades_data:
+        # Ignoring deposit transactions
+        if trade['type'] != 'deposit':
+            trade_info = {
+                'open_time': convertToDay(trade ['open_time']),
+                'symbol': trade['symbol'],
+                'lots': trade['lots'],
+                'type': trade['type'],
+                'rr': calcRiskReward(trade['open_price'], trade['stop_loss'], trade['take_profit'])
+            }
+            trades_list.append(trade_info)
+
+    return render_template('analysis.html', trades_list=trades_list)
 
 
 if __name__ == '__main__':
