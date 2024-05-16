@@ -66,6 +66,22 @@ def dump_requests(response):
     data = dump.dump_all(response)
     print(data.decode('utf-8'))
 
+
+def calcRiskReward(open_price, stop_loss, take_profit):
+    risk = open_price - stop_loss
+    reward = take_profit - open_price
+    risk_reward_ratio = reward / risk
+    return round(risk_reward_ratio, 2)
+
+
+def convertToDay(date_str):
+    # Parse the datetime string into a datetime object
+    date_obj = datetime.strptime(date_str, '%Y-%m-%dT%H:%M:%SZ')
+    # Get the day of the week (e.g., 'Monday')
+    day_of_week = date_obj.strftime('%A')
+    return day_of_week
+
+
 # VIEWS
 @app.route('/')
 def index():
@@ -199,8 +215,8 @@ def accounts():
                 return render_template('accounts.html', user_accounts=user_accounts)
 
             else:
-                error_messgae = "Try again"
-                return error_messgae
+                error_message = "Try again"
+                return error_message
 
         user_id = session['user_id']
         user_accounts = TradingAccounts.query.filter_by(user_id=user_id).all()
@@ -215,7 +231,7 @@ def dashboard():
         user_id = session['user_id']
 
         # Grabbing the account ID from the link the user pressed from the account table
-        account_id1 = int(request.form.get('account_id'))
+        account_id1 = int(request.args.get('account_id'))
 
         # Getting all accounts
         endpoint = "accounts"
@@ -301,18 +317,20 @@ def dashboard():
 
         trades_data = data['data']
 
-        # List to store trade dictionaries
+                    # List to store trade dictionaries
         trades_list = []
 
         # Iterating over trades data and extracting required information
         for trade in trades_data:
             # Ignoring deposit transactions
             if trade['type'] != 'deposit':
+
                 trade_info = {
                     'open_time': trade['open_time'],
                     'symbol': trade['symbol'],
                     'lots': trade['lots'],
-                    'type': trade['type']
+                    'type': trade['type'],
+                    'rr': calcRiskReward(trade['open_price'], trade['stop_loss'], trade['take_profit'])
                 }
                 trades_list.append(trade_info)
 
@@ -434,6 +452,39 @@ def submitCopy():
     print(slaveaccount)
     return render_template('dashboard.html')
 """
+
+
+@app.route('/analysis')
+def analysis():
+                # All of the user's trades
+    endpoint = f"trades"
+    url = base_url + endpoint
+    response = requests.get(url, headers=header)
+    data = response.json()
+    pp = pprint.PrettyPrinter(width=41, compact=True)
+    print("Trades")
+    pp.pprint(data)
+
+    trades_data = data['data']
+
+
+    trades_list = []
+
+                # Iterating over trades data and extracting required information
+    for trade in trades_data:
+        # Ignoring deposit transactions
+        if trade['type'] != 'deposit':
+            trade_info = {
+                'open_time': convertToDay(trade ['open_time']),
+                'symbol': trade['symbol'],
+                'lots': trade['lots'],
+                'type': trade['type'],
+                'rr': calcRiskReward(trade['open_price'], trade['stop_loss'], trade['take_profit'])
+            }
+            trades_list.append(trade_info)
+
+    return render_template('analysis.html', trades_list=trades_list)
+
 
 if __name__ == '__main__':
     app.run(debug=True)

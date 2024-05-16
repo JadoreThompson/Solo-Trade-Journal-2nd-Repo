@@ -87,35 +87,42 @@
 </head>
 <body>
 <!-- Navbar Area -->
-<nav class="navbar navbar-expand-lg">
-    <div class="container-fluid">
-        <img src="#" alt="">
-        <button onclick="menuToggle()" class="navbar-toggler"
-                type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
-                aria-controls="navbarSupportedContent" aria-expanded="false"
-                aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item">
-                  <a class="nav-link" href="/accounts">Accounts</a>
-                </li>
-            </ul>
+<div class="header">
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <img src="#" alt="">
+            <button onclick="menuToggle()" class="navbar-toggler"
+                    type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+                    aria-controls="navbarSupportedContent" aria-expanded="false"
+                    aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/accounts">Accounts</a>
+                    </li>
+                </ul>
+            </div>
         </div>
-    </div>
-    <script>
-        function menuToggle(){
-            var overlay = document.getElementById("navbarSupportedContent");
-            var computedStyle = window.getComputedStyle(overlay);
-            if (computedStyle.display === "none" || computedStyle.display === ""){
-                overlay.style.display = "flex";
-            } else {
-                overlay.style.display = "none";
+        <script>
+            function menuToggle(){
+                var overlay = document.getElementById("navbarSupportedContent");
+                var computedStyle = window.getComputedStyle(overlay);
+                if (computedStyle.display === "none" || computedStyle.display === ""){
+                    overlay.style.display = "flex";
+                } else {
+                    overlay.style.display = "none";
+                }
             }
+        </script>
+    </nav>
+    <style>
+        .header{
+            width: 100%;
         }
-    </script>
-</nav>
+    </style>
+</div>
 <!-- Navbar Area End -->
 
 
