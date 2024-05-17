@@ -42,6 +42,14 @@ class TradingAccounts(db.Model):
     # Relationship between tables
     user = db.relationship('Users', backref=db.backref('trading_accounts', lazy=True))
 
+class CopyTrading(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    name = db.Column(db.String, nullable=False)
+    master_account = db.Column(db.String, nullable=False)
+
+    # Foreign Key
+    user = db.relationship('Users', backref=db.backref('copy_trading', lazy=True))
 
 with app.app_context():
     db.create_all()
@@ -88,6 +96,20 @@ def convertToTime(date_str):
     time_of_day = date_obj.strftime('%H:%M')
     return time_of_day
 
+
+def is_brokerserver_in_dict(server, mt_version):
+    # Getting list of brokers
+    endpoint = "broker-servers"
+    url = base_url + endpoint
+    response = requests.get(url, headers=header)
+
+    data = response.json()
+    new_data = data['data']
+
+    for item in new_data:
+        if item['name'] == server and item['mt_version'] == mt_version:
+            data_dict = item
+            return(data_dict['broker_id'])
 
 # VIEWS
 @app.route('/')
@@ -144,90 +166,74 @@ def signup():
 
 @app.route('/accounts', methods=['POST', 'GET'])
 def accounts():
-    # If user isn't logged in direct to login page
     if 'user_id' not in session:
         return redirect('/login')
     else:
         if request.method == "POST":
+                    # Grabbing from the form
             name = request.form['name']
-            account_number = request.form['account-login']
-            broker = request.form['broker']
+            account_login = request.form['account-login']
             password = request.form['password']
+            broker = request.form['broker']
+            broker_server = request.form['broker-server']
             mt_version = request.form['mt-version']
-            server = request.form['server']
 
-            print(name)
-            print(account_number)
-            print(password)
-            print(mt_version)
-            print(server)
 
-            # Getting Broker Server ID
-            endpoint = "broker-servers"
-            url = base_url + endpoint
-            print(f"URL is: {url}")
-            data = {
-                "name": server,
-                "mt_version": mt_version
-            }
-            response = requests.get(url, headers=header, json=data)
-            data = response.json()
-            print(f"Data is: {data}")
 
-            # Filtering through all broker servers
-            filtered_content = [broker_id for broker_id in data['data'] if broker_id['name'] == server]
-            print(f"Filtered Content: {filtered_content}")
-            id_value = filtered_content[0]['id']
-            print(f"ID Value is: {id_value}")
+                    # Checking if the broker server exists
+            broker_server_id = is_brokerserver_in_dict(broker_server, mt_version)
+            if broker_server_id:
+                print("Broker Server exists:", broker_server_id)
+                        # Creating account with API
+                endpoint = "accounts"
+                url = base_url + endpoint
+                data = {
+                    "account_name": name,
+                    "mt_version": mt_version,
+                    "account_number": account_login,
+                    "password": password,
+                    "broker_server_id": broker_server_id
+                }
 
-            # Sending info to create account endpoint
-            endpoint = "accounts"
-            url = base_url + endpoint
-            print(f"URL is: {url}")
+                response = requests.post(url, headers=header, json=data)
 
-            data = {
-                "account_name": name,
-                "mt_version": mt_version,
-                "account_number": account_number,
-                "password": password,
-                "broker_server_id": id_value
-            }
+                if response.status_code == 200:
+                    print("Account Created")
 
-            response = requests.post(url, headers=header, json=data)
-            data = response.json()
-            print(f"Data is: {data}")
-            print(f"Status Code:", response.status_code)
+                    # Adding to the table
+                    newAccount = TradingAccounts(
+                        user_id=session['user_id'],
+                        name=name,
+                        account_login=account_login,
+                        password=password,
+                        broker=broker,
+                        broker_server=broker_server,
+                        mt_version=mt_version
+                    )
 
-            if response.status_code == 200:
-                newTradingAccount = TradingAccounts(
-                    user_id=session['user_id'],
-                    name=name,
-                    account_login=account_number,
-                    password=password,
-                    broker=broker,
-                    broker_server=server,
-                    mt_version=mt_version
-                )
+                    db.session.add(newAccount)
+                    db.session.commit()
 
-                db.session.add(newTradingAccount)
-                db.session.commit()
-                # Return user to the page with the account table
+                    return redirect('/accounts')
+                else:
+                    print("Account not created")
+                    dump_requests(response)
+                    error_message = "Account not created"
 
-                user_id = session['user_id']
-                user_accounts = TradingAccounts.query.filter_by(user_id=user_id).all()
-                print("User accounts:")
-                for account in user_accounts:
-                    print(account.name)
-
-                return render_template('accounts.html', user_accounts=user_accounts)
+                    user_accounts = TradingAccounts.query.filter_by(user_id=session['user_id']).all()
+                    return render_template('accounts.html', error_message=error_message,
+                                           user_accounts=user_accounts,)
 
             else:
-                error_message = "Try again"
-                return error_message
+                print("Broker Server does not exist")
+                error_message = "Broker server does not exist"
+                user_accounts = TradingAccounts.query.filter_by(user_id=session['user_id']).all()
+                return render_template('accounts.html',
+                                       error_message=error_message,
+                                       user_accounts=user_accounts)
 
-        user_id = session['user_id']
-        user_accounts = TradingAccounts.query.filter_by(user_id=user_id).all()
-        return render_template('accounts.html', user_accounts=user_accounts)
+    user_accounts = TradingAccounts.query.filter_by(user_id=session['user_id']).all()
+    return render_template('accounts.html', user_accounts=user_accounts)
 
 
 @app.route('/dashboard', methods=['POST', 'GET'])
@@ -395,20 +401,15 @@ def dashboard():
 
 
 
-@app.route('/delete_account/<account_id>', methods=['DELETE'])
+@app.route('/delete-account/<int:account_id>/', methods=['DELETE'])
 def delete_account(account_id):
-    try:
-        # Get the account
-        account = TradingAccounts.query.get(account_id)
-        if account:
-            # Delete the account
-            db.session.delete(account)
-            db.session.commit()
-            return jsonify(success=True)
-        else:
-            return jsonify(success=False, error='Account not found.')
-    except Exception as e:
-        return jsonify(success=False, error=str(e))
+    account = TradingAccounts.query.filter_by(user_id=session['user_id'], id=account_id).first()
+    print(account)
+    print("Account ID:", account_id)
+    db.session.delete(account)
+    db.session.commit()
+    return {"status": "success"},200
+
 
 
 
@@ -421,18 +422,22 @@ def copytrading():
     if request.method == "POST":
         trading_accounts = TradingAccounts.query.filter_by(user_id=session['user_id']).all()
 
+
+                # Grabbing from the form
+        name = request.form['name']
         master_account = request.form['master-account']
         slave_account = request.form['slave-account']
         risk_type = request.form['risk-type']
         risk_value = request.form['risk-value']
 
+                # Error handling
         if master_account == slave_account:
             error_message = "Can't be the same account"
             return render_template('copy_trading.html',
                                    error_message=error_message, master_account=master_account,
                                    slave_account=slave_account, trading_accounts=trading_accounts)
 
-        # Creating the copier
+             # Creating the copier
         endpoint = "copiers"
         url = base_url + endpoint
         body = {
@@ -445,13 +450,23 @@ def copytrading():
         data = response.json()
         print("Data: \n", data)
 
-        return redirect('/dashboard')
+            # Adding to database
+        newCopyTrading = CopyTrading(
+            user_id=session['user_id'],
+            name=name,
+            master_account=master_account
+        )
 
+        db.session.add(newCopyTrading)
+        db.session.commit()
 
+        return redirect('/copy-trading')
+
+    copytrading_accounts = CopyTrading.query.filter_by(user_id=session['user_id']).all()
     trading_accounts = TradingAccounts.query.filter_by(user_id=session['user_id']).all()
     return render_template('copy_trading.html', trading_accounts=trading_accounts,
                            error_message=error_message, master_account=master_account,
-                           slave_account=slave_account)
+                           slave_account=slave_account, copytrading_accounts=copytrading_accounts)
 
 """
 @app.route('/submit-copy', methods=['POST', 'GET'])
