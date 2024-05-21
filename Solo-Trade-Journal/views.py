@@ -176,7 +176,6 @@ def dashboard(account_id):
         total_profit = found_item['total_profit']
 
         trades_list = {
-            'open_time':
         }
 
 
@@ -187,6 +186,17 @@ def dashboard(account_id):
 
 @views.route("/analysis")
 def analysis():
+    if 'user_id' not in session:
+        return redirect(url_for("views.login"))
+    if 'account_id' not in session:
+        return redirect(url_for("views.accounts"))
+
+    account = TradingAccounts.query.filter_by(user_id=session['user_id'], id=session['account_id']).first()
+    print("Account Name: ", account.name)
+
+    trades_list = {
+
+    }
     return render_template("analysis.html")
 
 

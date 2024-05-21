@@ -2,9 +2,183 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap Styling -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+          crossorigin="anonymous">
+
+    <title>{{ page_title }}</title>
+
+    <!-- Custom CSS -->
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: #f5f5f5;
+        }
+    </style>
 </head>
 <body>
+<!-- Header -->
+<nav class="navbar navbar-expand-lg">
+    <div class="container-fluid">
+        <img src="#" alt="">
+        <button onclick="menuToggle()" class="navbar-toggler"
+                type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false"
+                aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                  <a class="nav-link" href="/accounts">Accounts</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="/analysis">Analysis</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="/copytrading">Copy-Trading</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <script>
+    function menuToggle(){
+        var overlay = document.getElementById("navbarSupportedContent");
+        var computedStyle = window.getComputedStyle(overlay);
+        if (computedStyle.display === "none" || computedStyle.display === ""){
+            overlay.style.display = "flex";
+        } else {
+            overlay.style.display = "none";
+        }
+    }
+</script>
+</nav>
+<!-- Header End -->
 
+
+
+<!-- Main Content -->
+<div class="main-container">
+    <div class="card-container">
+        <div class="card">
+            <div class="card-title">
+                <div class="filter-container">
+                    <input type="text" id="myInput" onkeyup="myFunction()" placeholder="Enter Filter...">
+                </div>
+            </div>
+            <div class="card-body">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Tags</th>
+                        <th>Day</th>
+                        <th>Open Time</th>
+                        <th>Symbol</th>
+                        <th>Type</th>
+                        <th>Lots</th>
+                        <th>RR</th>
+                        <th>Outcome</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for trade in trades_list %}
+                        <tr>
+                            <td>{{ trade.tags }}</td>
+                            <td>{{ trade.day }}</td>
+                            <td>{{ trade.open_time }}</td>
+                            <td>{{ trade.symbol }}</td>
+                            <td>{{ trade.type }}</td>
+                            <td>{{ trade.lots }}</td>
+                            <td>{{ trade.rr }}</td>
+                            <td>{{ trade.profit }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <style>
+        .main-container {
+            display: flex;
+            height: 100vh; /* Full height of the viewport */
+            background-color: #f5f5f5;
+        }
+        .card-container {
+            background-color: white;
+            margin: 10px;
+            width: 100%;
+            border-radius: 10px;
+        }
+        .card {
+            border: none;
+            background-color: white;
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            margin: 10px;
+        }
+        .card-title {
+            width: 100%;
+            margin-bottom: 15px;
+        }
+        .filter-container {
+            width: 20%;
+        }
+        .filter-container input {
+            border: none;
+            border-bottom: 2px solid black;
+        }
+        .card-body {
+            width: 100%;
+        }
+        table {
+            width: 100%;
+            text-align: center;
+        }
+        table tr {
+            margin-bottom: 10px;
+        }
+    </style>
+    <script>
+
+        //  Function for filtering the table for desired outcome
+        function myFunction() {
+          // Declare variables
+          var input, filter, table, tr, td, i, txtValue;
+          input = document.getElementById("myInput");
+          filter = input.value.toUpperCase();
+          table = document.getElementsByTagName("table")[0];
+          tr = table.getElementsByTagName("tr");
+
+          // Loop through all table rows, and hide those who don't match the search query
+          for (i = 0; i < tr.length; i++) {
+            td = tr[i].getElementsByTagName("td")[0];
+            if (td) {
+              txtValue = td.textContent || td.innerText;
+              if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                tr[i].style.display = "";
+              } else {
+                tr[i].style.display = "none";
+            row = tr[i];
+            td = tr[i].getElementsByTagName("td");
+            for ( var j = 0; j < td.length; j++) {
+              if (td[j]) {
+                txtValue = td[j].textContent || td[j].innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                  row.style.display = "";
+                  break;
+                } else {
+                  row.style.display = "none";
+                }
+              }
+            }
+          }
+        }
+    </script>
+</div>
+<!-- Main Content End -->
 </body>
 </html>
