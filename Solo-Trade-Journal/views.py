@@ -149,9 +149,36 @@ def dashboard(account_id):
     if 'account_id' not in session:
         return redirect(url_for("views.accounts"))
 
-    #   Use session id to get account id
+    #   Use session id to get account name
     print("Session ID: ", session['account_id'])
     account = TradingAccounts.query.filter_by(user_id=session['user_id'], id=session['account_id']).first()
+    print("Account Name: ", account.name)
+
+    #   Using name as the identifier
+    endpoint = "accounts"
+    url = base_url + endpoint
+    response = requests.get(url, headers=header)
+    data = response.json()
+    print(data)
+
+    data = data['data']
+    found = False
+    for item in data:
+        if item['account_name'] == account.name:
+            found = True
+            found_item = item
+    if found:
+
+        #   Sending variables to the dashboard
+        print("Account found: ", found_item)
+        weekly_profit = found_item['weekly_profit']
+        account_balance = found_item['balance']
+        total_profit = found_item['total_profit']
+
+        trades_list = {
+            'open_time':
+        }
+
 
 
 
