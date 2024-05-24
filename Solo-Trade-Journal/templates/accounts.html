@@ -14,6 +14,8 @@
     <style>
         body {
           font-family: "Plus Jakarta Sans", sans-serif;
+          background-color: #ededed;
+          color: black;
         }
     </style>
 </head>
@@ -48,27 +50,13 @@
                 </tr>
                 </thead>
                 <tbody>
+                {% for account in accounts %}
                 <tr>
-                    <td>James</td>
-                    <td>10%</td>
+                    <td>
+                        <a href="{{ url_for('views.dashboard',account_id=account.id)}}">{{ account.name }}</a>
+                    </td>
                 </tr>
-                <tr>
-                    <td>James</td>
-                    <td>10%</td>
-                </tr>
-
-                <tr>
-                    <td>James</td>
-                    <td>10%</td>
-                </tr>
-                <tr>
-                    <td>James</td>
-                    <td>10%</td>
-                </tr>
-                <tr>
-                    <td>James</td>
-                    <td>10%</td>
-                </tr>
+                {% endfor %}
                 </tbody>
             </table>
         </div>
@@ -76,6 +64,22 @@
             <div id="container" style="width: 100%; height: 100% margin: 0; padding: 0;">
             </div>
         </div>
+
+        <div id="backgroundOverlay">
+        </div>
+        <style>
+            #backgroundOverlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.5); /* semi-transparent black */
+                z-index: 999; /* any value less than the z-index of #addAccount */
+                display: none; /* initially hidden */
+            }
+        </style>
+
         <div class="" id="addAccount">
             <div class="overlay-header">
                 <div class="overlay-title">
@@ -86,69 +90,43 @@
                 </div>
             </div>
             <div class="overlay-body">
-                <form action="/accounts" methods="post">
+                <form action="/accounts" method="post">
                     <div class="form-element">
                         <label for="name">Name:</label><br>
-                        <input type="text" value="name" id="name" placeholder="Personal Account">
+                        <input type="text" name="name" id="name" placeholder="Personal Account">
                     </div>
                     <div class="form-element">
                         <label for="account-login">Account Number:</label><br>
-                        <input type="text" value="account-login" id="account-login" placeholder="109908009">
+                        <input type="text" name="account-login" id="account-login" placeholder="109908009">
                     </div>
                     <div class="form-element">
-                        <label for="account-login">Password</label><br>
-                        <input type="text" value="account-login" id="password" placeholder="abcdefg">
+                        <label for="password">Password</label><br>
+                        <input type="text" name="password" id="password" placeholder="abcdefg">
                     </div>
                     <div class="form-element">
                         <label for="mt-version">MT-Version</label><br>
-                        <input type="text" value="mt-version" id="mt-version" placeholder="4/5">
+                        <input type="number" name="mt-version" id="mt-version" placeholder="4 or 5">
                     </div>
                     <div class="form-element">
                         <label for="broker">Broker</label><br>
-                        <input type="text" value="broker" id="broker" placeholder="IC Markets">
+                        <input type="text" name="broker" id="broker" placeholder="IC Markets">
                     </div>
                     <div class="form-element">
                         <label for="broker-server">Broker Server</label><br>
-                        <input type="text" value="broker-server" id="broker-server" placeholder="ICMarketsSC-Live01">
+                        <input type="text" name="broker-server" id="broker-server" placeholder="ICMarketsSC-Live01">
                     </div>
                     <button type="submit">Submit</button>
                 </form>
 
-                <style>
-                    input {
-                        height: 2.2rem;
-                        width: 100%;
-                        max-width: 100%;
-                        box-sizing: border-box;
-                        border: 1px solid #ccc;
-                        padding: 0;
-                    }
-
-                    form {
-                        width: 100%;
-                        padding: 5px;
-                    }
-
-                    .form-element {
-                        margin-bottom: 10px;
-                    }
-
-                    form button {
-                        width: 100%;
-                        height: 3rem;
-                        border-radius: 10px;
-                        font-size: 1rem;
-                    }
-                </style>
+                <div class="error">
+                    {% if error %}
+                    <p>{{ error_message }}</p>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </div>
     <style>
-        body {
-            background-color: #ededed;
-            color: black;
-        }
-
         .container {
             padding: 10px;
         }
@@ -167,6 +145,7 @@
 
         button {
             font-family: "Plus-Jakarta-Sans", sans-serif;
+            border-radius: 10px;
         }
 
         .table-container {
@@ -205,7 +184,9 @@
             max-width: 600px;
             display: none;
             z-index: 9999;
-            top: 10%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             margin: auto;
             position: fixed;
         }
@@ -226,17 +207,55 @@
         .overlay-close {
             margin-right: 0;
         }
+
+        label {
+            font-size: 0.5 rem;
+        }
+
+        input {
+            height: 2.2rem;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 0;
+        }
+
+        /*input::value {
+            font-size: 16px; /* Change the font size */
+            text-align: center; /* Center the placeholder text */
+        }*/
+
+        form {
+            width: 100%;
+            padding: 5px;
+        }
+
+        .form-element {
+            margin-bottom: 10px;
+        }
+
+        form button {
+            width: 100%;
+            height: 3rem;
+            font-size: 1rem;
+            background-color: blue;
+            color: white;
+        }
     </style>
 
     <script>
         // Add Account function
         function addAccount() {
             var overlay = document.getElementById("addAccount");
+            var backgroundOverlay = document.getElementById("backgroundOverlay");
             if (overlay.style.display === "none" ) {
                 overlay.style.display = "block";
+                backgroundOverlay.style.display = "block"; // show the background overlay
             } else {
                 overlay.style.display = "none";
-
+                backgroundOverlay.style.display = "none"; // hide the background overlay
             }
         }
 

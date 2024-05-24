@@ -1,313 +1,174 @@
-<!DOCTYPE html>
-<html>
-  <head>
-
-    <title>Dashboard</title>
+<!doctype html>
+<html lang="en">
+<head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
-    <!-- Bootstrap Styling -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-          rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
-          crossorigin="anonymous">
-    <!-- End -->
-
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
+    <title>Document</title>
+</head>
+<body>
+    <nav>
+        <img src="https://media.discordapp.net/attachments/954082449888006184/1243325550924136498/Solo_Journal_Logo_2.png?ex=665110a7&is=664fbf27&hm=8cd6fc23332188d2f3baf2c72f81965b5c771de302307c460eb0fcd19183b36d&=&format=webp&quality=lossless&width=375&height=195" alt="Logo">
+    </nav>
     <style>
-      body {
-        font-family: Arial, Helvetica, sans-serif;
-        background-color: #f1f1f1;
-      }
+        nav {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            max-height: 50px;
+            margin-top: 10px;
+        }
 
-
-      .main-container {
-        display: flex;
-        flex-direction: column;
-        width:100%;
-        height: 100vh;
-      }
-
-
-      .first-row {
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-        width: 100%;
-        height: 50px;
-        background-color: rgba(0, 0, 0, 0);
-        margin-bottom: 10px;
-      }
-
-      .second-row {
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-        width: 100%;
-        height: 400px;
-        background-color: white;
-        margin-bottom: 10px;
-      }
-
-      .second-row-card {
-        margin-right: 10px;
-        box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
-        transition: 0.3s;
-        border-radius: 5px;
-      }
-
-      .second-row-card:last-child {
-        margin-right: 0;
-        width:20%;
-      }
-
-      .second-row-card:first-child {
-        width: 80%;
-      }
-
-      .card {
-        margin-right: 10px;
-        box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
-        transition: 0.3s;
-        width: 40%;
-        border-radius: 5px;
-      }
-
-      .card:last-child {
-        margin-right: 0;
-      }
-
-      .card:hover {
-        box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
-      }
-
-      .container {
-        margin-left: 10px;
-      }
-
-      h4, span {
-        margin: 0;
-        padding: 0;
-      }
-
-      span {
-
-        color: #9e9e9e;
-      }
-
-
-
-      .chart-card {
-        box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
-        transition: 0.3s;
-        border-radius: 5px;
-        overflow: hidden;
-      }
-
-      .card-body {
-        display: flex;
-        flex-direction: row;
-
-        height: 100%;
-      }
-
-      .card-body div {
-        margin-right: 20px;
-      }
-
-      #container {
-        height: 100%;
-        width: 100%;
-      }
-
-      .stat-card {
-        background-color: white;
-      }
-
-      .stat-card .card-body{
-        justify-content: space-between;
-        margin-left: 7px;
-      }
-
-      .third-row{
-        width: 100%;
-        height: 300px;
-      }
-
-      .third-row-card{
-        width: 100%;
-        background-color: white;
-        height: 100%
-      }
-
-      .card-body table{
-        width: 100%;
-      }
-
-      td {
-        text-align: center;
-      }
-
-      tr th{
-        border-bottom: #9e9e9e 1px solid;
-      }
+        nav img {
+            display: block;
+            max-width: 15%;
+        }
     </style>
-  </head>
-  <body>
-    <!-- Header -->
-    <nav class="navbar navbar-expand-lg">
-        <div class="container-fluid">
-            <img src="#" alt="">
-            <button onclick="menuToggle()" class="navbar-toggler"
-                    type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
-                    aria-controls="navbarSupportedContent" aria-expanded="false"
-                    aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
-                      <a class="nav-link" href="/accounts">Accounts</a>
-                    </li>
-                    <li class="nav-item">
-                      <a class="nav-link" href="/analysis">Analysis</a>
-                    </li>
-                  <li class="nav-item">
-                  <a class="nav-link" href="/copytrading">Copy-Trading</a>
-                </li>
-                </ul>
+    <h3>Dashboard</h3>
+    <div class="container">
+        <div class="small-stats">
+            <div class="small-stat">
+                <h4>7d PNL</h4>
+                <p>+$170</p>
+                <span>+$70 from last week</span>
+            </div>
+            <div class="small-stat">
+                <h4>7d Growth</h4>
+                <p>+1.7%</p>
+                <span>+1% from last week</span>
+            </div>
+            <div class="small-stat">
+                <h4>Account Value</h4>
+                <p>$1000</p>
             </div>
         </div>
-        <script>
-        function menuToggle(){
-            var overlay = document.getElementById("navbarSupportedContent");
-            var computedStyle = window.getComputedStyle(overlay);
-            if (computedStyle.display === "none" || computedStyle.display === ""){
-                overlay.style.display = "flex";
-            } else {
-                overlay.style.display = "none";
-            }
-        }
-    </script>
-    </nav>
-    <!-- Header End -->
+        <div class="chart-container">
+            <h4>Monthly Growth</h4>
 
-
-    <div class="main-container">
-      <div class="first-row">
-        <div class="card">
-          <div class="container">
-            <span>7d Pnl</span>
-            <h4>{{ weekly_profit }}%</h4>
-          </div>
+            <div id="container"></div>
         </div>
-        <div class="card">
-          <div class="container">
-            <span>Balance</span>
-            <h4>${{ account_balance }}</h4>
-          </div>
-        </div>
-        <div class="card">
-          <div class="container">
-            <span>Total Profit</span>
-            <h4>{{ total_profit }}</h4>
-          </div>
+        <div class="order-table">
+            <h4>All Trades</h4>
+            <div class="table-container">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Day</th>
+                        <th>Time</th>
+                        <th>Type</th>
+                        <th>Outcome</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>Monday</td>
+                        <td>12:00</td>
+                        <td>Buy</td>
+                        <td>+$50</td>
+                    </tr>
+                    <tr>
+                        <td>Monday</td>
+                        <td>12:00</td>
+                        <td>Buy</td>
+                        <td>+$50</td>
+                    </tr>
+                    <tr>
+                        <td>Monday</td>
+                        <td>12:00</td>
+                        <td>Buy</td>
+                        <td>+$50</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
         <style>
-          h4 {
-            font-size: 20px;
-          }
+            body {
+                background-color: #f5f5f5;
+                font-family: 'Plus Jakarta Sans', sans-serif;
+            }
 
-          span {
-            font-size: 5px;
-          }
+            .container {
+                margin-top: 10px;
+                border-radius: 20px;
+                background-color: rgba(0,0,0,0);
+            }
+
+            .small-stats {
+                background-color: rgba(0,0,0,0);
+                justify-content: space-between;
+                display: grid;
+                gap: 2rem;
+                grid-template-columns:
+                    repeat(auto-fit, minmax(180px, 1fr));
+            }
+
+            .small-stat {
+                padding: 10px;
+                background-color: white;
+                box-sizing: border-box;
+                border-radius: 20px;
+                border: 1px solid black;
+            }
+
+            .chart-container {
+                margin-top: 1rem;
+                padding: 10px;
+                background-color: white;
+                border: 1px solid black;
+                border-radius: 20px;
+            }
+
+            #container {
+                padding: 10px;
+                min-height: 400px;
+                box-sizing: border-box;
+            }
+
+            .order-table {
+                margin-top: 1rem;
+                padding: 10px;
+                background-color: white;
+                border: 1px solid black;
+                border-radius: 20px;
+            }
+
+            .table-container {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+
+            table {
+                text-align: center;
+                justify-content: space-between;
+                width: 100%;
+                max-width: 100%;
+            }
         </style>
-      </div>
-
-      <div class="second-row">
-
-        <div class="chart-card second-row-card">
-            <div id="container"
-              style="width: 100%; height: 100%; margin: 0;
-              padding: 0;">
-            </div>
-            <script>
-              const chartOptions = { layout: { textColor: 'black', background: { type: 'solid', color: 'white' } } };
-              const chart = LightweightCharts.createChart(document.getElementById('container'), chartOptions);
-              const lineSeries = chart.addLineSeries({ color: '#2962FF' });
-
-              // Convert the monthly_list from Python to JavaScript
-              const monthlyData = JSON.parse('{{ monthly_list | tojson | safe }}');
-
-              // Process the data for the chart
-              const chartData = monthlyData.map(item => {
-                // Convert the Unix timestamp to a JavaScript Date object
-                const date = new Date(item.date * 1000);
-                // Format the date as 'Month Year' (e.g., 'January 2022')
-                const formattedDate = date.toLocaleString('default', { month: 'long' }) + ' ' + date.getFullYear();
-
-                return {
-                  time: formattedDate,
-                  value: item.growth
-                };
-              });
-
-              lineSeries.setData(chartData);
-
-              chart.timeScale().fitContent();
-            </script>
-        </div>
-
-        <div class="stat-card second-row-card">
-          <div class="container">
-            <div class="card-title">
-              <h4>Statistics</h4>
-            </div>
-            <div class="card-body">
-              <div class="stat-label">
-                <span>Balance</span>
-                <span>Broker</span>
-              </div>
-              <div class="stat-value">
-                <span>${{ account_size }}</span>
-                  <span></span>
-
-              </div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-      <div class="third-row">
-        <div class="third-row-card">
-          <div class="container">
-            <div class="card-title">
-              <span>HistoryTable</span>
-              <!-- <h4>100%</h4> -->
-            </div>
-            <div class="card-body">
-              <table>
-                <thead>
-                    <tr>
-                        <th>Time</th>
-                        <th>Symbol</th>
-                        <th>Lots</th>
-                        <th>Type</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for trade in trades_list %}
-                        <tr>
-                        <td>{{ trade.open_time }}</td>
-                        <td>{{ trade.symbol }}</td>
-                        <td>{{ trade.lots }}</td>
-                        <td>{{ trade.type }}</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
-  </body>
+
+    <script>
+        const chartContainer = document.getElementById('container')
+        const chart = LightweightCharts.createChart(chartContainer, {width: chartContainer.clientWidth, height: chartContainer.clientHeight});
+        const lineSeries = chart.addLineSeries();
+        lineSeries.setData([
+            { time: '2019-04-11', value: 80.01 },
+            { time: '2019-04-12', value: 96.63 },
+            { time: '2019-04-13', value: 76.64 },
+            { time: '2019-04-14', value: 81.89 },
+            { time: '2019-04-15', value: 74.43 },
+            { time: '2019-04-16', value: 80.01 },
+            { time: '2019-04-17', value: 96.63 },
+            { time: '2019-04-18', value: 76.64 },
+            { time: '2019-04-19', value: 81.89 },
+            { time: '2019-04-20', value: 74.43 },
+        ]);
+    </script>
+</body>
 </html>

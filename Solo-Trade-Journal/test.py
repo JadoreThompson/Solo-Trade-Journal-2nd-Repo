@@ -15,15 +15,9 @@ header = {
     "Content-Type": 'application/json'  # Fixed typo here
 }
 
-endpoint = "broker-servers"
-url = base_url + endpoint
-response = requests.get(url, headers=header)
-data = response.json()
-print("Broker Servers",data)
 
-
-endpoint = "analyses"
-url = base_url + endpoint
-response = requests.get(url, headers=header)
-data = response.json()
-print("All accounts",data)
+password = "dog"
+if len(password) > 5:
+    print(len(password))
+else:
+    print("gone")

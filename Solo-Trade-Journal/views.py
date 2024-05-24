@@ -29,6 +29,7 @@ def index():
 
 @views.route("/signup", methods=["POST", "GET"])
 def signup():
+    minCharacters = 8
     error = None
     page_title = "Signup"
 
@@ -38,6 +39,10 @@ def signup():
         password = request.form.get("password")
         password = generate_password_hash(password)
         print(name, email, password)
+
+        if len(password) < minCharacters :
+            error_message = "More characters"
+            return render_template('signup.html', page_title=page_title, error_message=error_message)
 
         #   Add user to database
         new_user = Users(name=name, email=email, password=password)
@@ -96,16 +101,21 @@ def accounts():
             #   Getting broker server id for account creation
             endpoint = "broker-servers"
             url = base_url + endpoint
-            response = requests.get(url, headers=header)
+            body = {
+                'mt_version': mt_version,
+            }
+            response = requests.get(url, headers=header, json=body)
             data = response.json()
             data = data['data']
             print("Broker Servers: ", data)
 
             found = False
             for item in data:
-                if item['mt_version'] == mt_version and item['name'] == broker_server:
+                if item['name'] == broker_server:
                     found = True
+                    print("found")
                     found_item = item
+
 
             if found:
                 broker_server_id = found_item['broker_id']
@@ -167,16 +177,7 @@ def dashboard(account_id):
         if item['account_name'] == account.name:
             found = True
             found_item = item
-    if found:
 
-        #   Sending variables to the dashboard
-        print("Account found: ", found_item)
-        weekly_profit = found_item['weekly_profit']
-        account_balance = found_item['balance']
-        total_profit = found_item['total_profit']
-
-        trades_list = {
-        }
 
 
 
