@@ -40,7 +40,7 @@ def signup():
         password = generate_password_hash(password)
         print(name, email, password)
 
-        if len(password) < minCharacters :
+        if len(password) < minCharacters:
             error_message = "More characters"
             return render_template('signup.html', page_title=page_title, error_message=error_message)
 
@@ -93,6 +93,7 @@ def accounts():
             name = request.form.get("name")
             account_login = request.form.get("account-login")
             password = request.form.get("password")
+            password = generate_password_hash(password)
             broker = request.form.get("broker")
             broker_server = request.form.get("broker-server")
             mt_version = request.form.get("mt-version")
