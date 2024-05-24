@@ -1,350 +1,292 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
+    <!-- Import the Lightweight Charts -->
+    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+    <style>
+        body {
+          font-family: "Plus Jakarta Sans", sans-serif;
+        }
+    </style>
 </head>
 <body>
-<div class="header"></div>
+    <nav>
+        <img src="https://media.discordapp.net/attachments/954082449888006184/1243325550924136498/Solo_Journal_Logo_2.png?ex=665110a7&is=664fbf27&hm=8cd6fc23332188d2f3baf2c72f81965b5c771de302307c460eb0fcd19183b36d&=&format=webp&quality=lossless&width=375&height=195" alt="Logo">
+    </nav>
+    <style>
+        nav {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            max-height: 50px;
+        }
 
-<!-- Main Content Start -->
-<div class="main-container">
-    <div class="card">
-        <div class="frow">
-            <button onclick="addAccount()">Add-Account</button>
-        </div>
+        nav img {
+            display: block;
+            max-width: 15%;
+        }
+    </style>
+    <div class="container">
+        <h3>All Accounts</h3>
         <div class="table-container">
+            <div class="table-item">
+                <button onclick="addAccount()">Add Account</button>
+            </div>
             <table>
                 <thead>
                 <tr>
                     <th>Name</th>
-                    <th>Options</th>
+                    <th>% Gain</th>
                 </tr>
                 </thead>
                 <tbody>
-                {% for account in accounts %}
                 <tr>
-                    <td>
-                        <a href="{{ url_for('views.dashboard', account_id=account.id)}}">{{ account.name }}</a>
-                    </td>
-                    <td>
-                        <button onclick="deleteAccount({{ account.id }})">Delete</button>
-                    </td>
+                    <td>James</td>
+                    <td>10%</td>
                 </tr>
-                {% endfor %}
+                <tr>
+                    <td>James</td>
+                    <td>10%</td>
+                </tr>
+
+                <tr>
+                    <td>James</td>
+                    <td>10%</td>
+                </tr>
+                <tr>
+                    <td>James</td>
+                    <td>10%</td>
+                </tr>
+                <tr>
+                    <td>James</td>
+                    <td>10%</td>
+                </tr>
                 </tbody>
             </table>
+        </div>
+        <div class="chart-card">
+            <div id="container" style="width: 100%; height: 100% margin: 0; padding: 0;">
+            </div>
+        </div>
+        <div class="" id="addAccount">
+            <div class="overlay-header">
+                <div class="overlay-title">
+                    <h3>Add Account</h3>
+                </div>
+                <div class="overlay-close">
+                    <button onclick="addAccount()">X</button>
+                </div>
+            </div>
+            <div class="overlay-body">
+                <form action="/accounts" methods="post">
+                    <div class="form-element">
+                        <label for="name">Name:</label><br>
+                        <input type="text" value="name" id="name" placeholder="Personal Account">
+                    </div>
+                    <div class="form-element">
+                        <label for="account-login">Account Number:</label><br>
+                        <input type="text" value="account-login" id="account-login" placeholder="109908009">
+                    </div>
+                    <div class="form-element">
+                        <label for="account-login">Password</label><br>
+                        <input type="text" value="account-login" id="password" placeholder="abcdefg">
+                    </div>
+                    <div class="form-element">
+                        <label for="mt-version">MT-Version</label><br>
+                        <input type="text" value="mt-version" id="mt-version" placeholder="4/5">
+                    </div>
+                    <div class="form-element">
+                        <label for="broker">Broker</label><br>
+                        <input type="text" value="broker" id="broker" placeholder="IC Markets">
+                    </div>
+                    <div class="form-element">
+                        <label for="broker-server">Broker Server</label><br>
+                        <input type="text" value="broker-server" id="broker-server" placeholder="ICMarketsSC-Live01">
+                    </div>
+                    <button type="submit">Submit</button>
+                </form>
+
+                <style>
+                    input {
+                        height: 2.2rem;
+                        width: 100%;
+                        max-width: 100%;
+                        box-sizing: border-box;
+                        border: 1px solid #ccc;
+                        padding: 0;
+                    }
+
+                    form {
+                        width: 100%;
+                        padding: 5px;
+                    }
+
+                    .form-element {
+                        margin-bottom: 10px;
+                    }
+
+                    form button {
+                        width: 100%;
+                        height: 3rem;
+                        border-radius: 10px;
+                        font-size: 1rem;
+                    }
+                </style>
+            </div>
         </div>
     </div>
     <style>
         body {
-            background-color: #c0c0c0;
+            background-color: #ededed;
+            color: black;
         }
 
-        .header {
-            height: 50px;
-            width: 100%;
-            background-color: rgba(0, 0, 0, 0);
+        .container {
+            padding: 10px;
         }
 
-        .main-container {
-            height: 100vh;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            background-color: #c0c0c0;
+        .table-item {
+            padding-bottom: 10px;
         }
 
-        .card {
-            background-color: white;
-            border-radius: 15px;
-            padding: 15px;
-            top: 20%;
-
-            display: flex;
-            flex-direction: column;
+        .table-item button {
+            background-color: blue;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 8px;
         }
 
-        .frow {
-            width: 100%:
-            display: flex;
-            justify-content: flex-start;
+        button {
+            font-family: "Plus-Jakarta-Sans", sans-serif;
         }
 
         .table-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        th td {
-            text-align: center;
-        }
-    </style>
-</div>
-<!-- Main Content End -->
-
-
-
-<!-- Add Account Start -->
-<div class="overlay" id="addAccount">
-    <div class="overlay-content">
-        <div class="overlay-header">
-            <div class="overlay-delete">
-                <button onclick="closeOverlay()">X</button>
-            </div>
-            <div class="overlay-title">
-                <h2>Add Account</h2>
-            </div>
-        </div>
-        <div class="overlay-body">
-            <form action="/accounts" method="post">
-                <div class="form-element">
-                    <label for="name">Name:</label>
-                    <input type="text" id="name" name="name">
-                </div>
-                <div class="form-element">
-                    <label for="account-login">Account Number:</label>
-                    <input type="text" id="account-login" name="account-login">
-                </div>
-                <div class="form-element">
-                    <label for="broker">Broker:</label>
-                    <input type="text" id="broker" name="broker">
-                </div>
-                <div class="form-element">
-                    <label for="password">Password:</label>
-                    <input type="password" id="password" name="password">
-                </div>
-                <div class="form-element">
-                    <label for="mt-version">MT Version:</label>
-                    <input type="text" id="mt-version" name="mt-version">
-                </div>
-                <div class="form-element">
-                    <label for="broker-server">Server:</label>
-                    <input type="text" id="broker-server" name="broker-server">
-                </div>
-                <button type="submit">Submit</button>
-            </form>
-            <div class="error-container">
-                {% if error %}
-                <p>{{ error_message }}</p>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-    <style>
-        #createCopier {
-
-        }
-
-        .overlay {
-            height: 100vh;
-            top:0;
-            left: 0;
-            width: 100%;
-            display: none;
-            position: fixed;
-            justify-content: center;
-            align-items: center;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 999;
-        }
-
-        .overlay-content {
+            border: 1px solid black;
             background-color: white;
-            border-radius: 15px;
-            padding: 20px;
+            border-radius: 20px;
+            min-height: 70%;
+            padding: 10px;
+            padding-bottom: 10px;
+        }
+
+        table {
+            text-align: center;
+            width: 100%;
+        }
+
+        thead {
+            text-decoration: underline;
+        }
+
+        #container {
+            border-radius: 20px;
+            margin-top: 10px;
+            min-height: 600px;
+            border: 1px solid black;
+            background-color: white;
+        }
+
+        #addAccount {
+            border-radius: 20px;
+            border: 1px solid black;
+            background-color: white;
+            margin: 10px auto;
+            padding: 10px;
+            width: 70%;
+            max-width: 600px;
+            display: none;
+            z-index: 9999;
+            top: 10%;
+            margin: auto;
+            position: fixed;
         }
 
         .overlay-header {
+            width: 100%;
             display: flex;
-            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
             text-align: center;
-        }
-
-        .overlay-delete {
-            display: flex;
-            justify-content: flex-end;
-        }
-
-        .overlay-delete button {
-            background-color: red;
-            color: white;
-            border-radius: 5px;
-            border: 2px solid red;
         }
 
         .overlay-body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 10px;
-        }
-
-        .overlay-body form {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .form-element {
-            display: flex;
-            flex-direction: column;
-            margin-bottom: 10px;
-        }
-
-        form button[type="submit"] {
-            background-color: blue;
-            color: white;
-            border-radius: 5px;
-            border: 2px solid blue;
-        }
-    </style>
-</div>
-<!-- Add Account End -->
-
-
-
-<!-- Delete Account Start -->
-<div class="overlay" id="deleteAccount">
-    <div class="overlay-content">
-        <div class="overlay-header">
-            <div class="overlay-delete">
-                <button onclick="closeOverlay()">X</button>
-            </div>
-            <div class="overlay-title">
-                <h2>Are you sure you want to delete ?</h2>
-            </div>
-        </div>
-        <div class="overlay-body">
-            <form action="/delete" method="delete">
-                <button type="submit">Yes</button>
-            </form>
-        </div>
-    </div>
-    <style>
-        #createCopier {
-
-        }
-
-        .overlay {
-            height: 100vh;
-            top:0;
-            left: 0;
-            width: 100%;
-            display: none;
-            position: fixed;
             justify-content: center;
             align-items: center;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 999;
-        }
-
-        .overlay-content {
-            background-color: white;
-            border-radius: 15px;
-            padding: 20px;
-        }
-
-        .overlay-header {
-            display: flex;
-            flex-direction: column;
-            text-align: center;
         }
 
         .overlay-close {
-            display: flex;
-            justify-content: flex-end;
-        }
-
-        .overlay-close button {
-            background-color: red;
-            color: white;
-            border-radius: 5px;
-            border: 2px solid red;
-        }
-
-        .overlay-body {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 10px;
-        }
-
-        .overlay-body form {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .form-element {
-            display: flex;
-            flex-direction: column;
-            margin-bottom: 10px;
-        }
-
-        form button[type="submit"] {
-            background-color: blue;
-            color: white;
-            border-radius: 5px;
-            border: 2px solid blue;
+            margin-right: 0;
         }
     </style>
-</div>
-<!-- Delete Account End -->
 
-<!-- JavaScript Area -->
-<script>
-    // Function to open add account overlay
-    function addAccount() {
-        // add account
-        var overlay = document.getElementById("addAccount");
-        if (overlay.style.display === "flex") {
-            overlay.style.display = "none";
-        } else {
-            overlay.style.display = "flex";
+    <script>
+        // Add Account function
+        function addAccount() {
+            var overlay = document.getElementById("addAccount");
+            if (overlay.style.display === "none" ) {
+                overlay.style.display = "block";
+            } else {
+                overlay.style.display = "none";
+
+            }
         }
-    }
 
-    // Function to delete account from account table
-    async function deleteAccount(accountId) {
-        const response = await fetch(`/delete-account/${accountId}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
+        // Create the chart
+        const chart = LightweightCharts.createChart(document.getElementById('chart'), {
+          width: 600,
+          height: 400,
+          layout: {
+            backgroundColor: '#ffffff',
+            textColor: '#333',
+          },
+          grid: {
+            vertLines: {
+              color: '#e1e1e1',
             },
+            horzLines: {
+              color: '#e1e1e1',
+            },
+          },
+          crosshair: {
+            mode: LightweightCharts.CrosshairMode.Normal,
+          },
+          rightPriceScale: {
+            borderColor: '#ccc',
+          },
+          timeScale: {
+            borderColor: '#ccc',
+          },
         });
 
-        const data = await response.json();
-        if (data.status === 200) {
-            alert('Account deleted successfully');
-        } else {
-            alert('Failed to delete account');
-        }
+        // Add a line series to the chart
+        const lineSeries = chart.addLineSeries({
+          color: 'rgba(0, 150, 136, 1)',
+          lineWidth: 2,
+        });
 
-        /*
-        if (response.ok) {
-            alert('Account deleted successfully');
-        } else {
-            alert('Failed to delete account');
-        }
-        */
-    }
+        // Set the data for the line series
+        lineSeries.setData([
+          { time: '2023-01-01', value: 50 },
+          { time: '2023-01-02', value: 55 },
+          { time: '2023-01-03', value: 60 },
+          { time: '2023-01-04', value: 58 },
+          { time: '2023-01-05', value: 63 },
+        ]);
 
-    // Function to open and close the add and delete account overlay
-    function closeOverlay() {
-        var overlay = document.getElementById("addAccount");
-        var overlay2 = document.getElementById("deleteAccount");
-        if (overlay.style.display === "flex" || overlay2.style.display === "flex") {
-            overlay.style.display = "none";
-            overlay2.style.display = "none";
-        } else {
-            overlay.style.display = "flex";
-            overlay2.style.display = "flex";
-        }
-    }
-
-
-
-</script>
+        // Optional: handle window resize to keep the chart responsive
+        window.addEventListener('resize', () => {
+          const chartContainer = document.getElementById('chart');
+          chart.resize(chartContainer.clientWidth, chartContainer.clientHeight);
+        });
+    </script>
 </body>
 </html>
