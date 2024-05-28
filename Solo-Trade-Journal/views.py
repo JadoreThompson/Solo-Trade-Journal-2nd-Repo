@@ -137,7 +137,7 @@ def accounts():
                 print("Account Creation Response ", data)
 
                 if response.status_code == 200:
-                    account = TradingAccounts(name=name, account_login=account_login, password=password, broker=broker, broker_server=broker_server, mt_version=mt_version, user_id=session['user_id'])
+                    account = TradingAccounts(name=name, user_id=session['user_id'])
                     db.session.add(account)
                     db.session.commit()
                     return redirect(url_for("views.accounts"))
@@ -165,7 +165,7 @@ def dashboard(account_id):
     account = TradingAccounts.query.filter_by(user_id=session['user_id'], id=session['account_id']).first()
     print("Account Name: ", account.name)
 
-    #   Using name as the identifier
+    #   Using name as the identifier for the tradesyncapi
     endpoint = "accounts"
     url = base_url + endpoint
     response = requests.get(url, headers=header)
@@ -178,10 +178,22 @@ def dashboard(account_id):
         if item['account_name'] == account.name:
             found = True
             found_item = item
+            print(found_item)
 
+    # Getting daily account analysis
+    tradesync_account_id = found_item['id']
+    print("TradeSync Acc ID: ", tradesync_account_id)
 
+    endpoint = f"analyses/{tradesync_account_id}/days"
+    url = base_url + endpoint
+    response = requests.get(url, headers=header)
+    print("Daily Analyses: ", response.json())
+    data = response['data']
 
+    account_info = {
+        "size": data['growth'] - data['total_deposits'],
 
+    }
 
     return render_template("dashboard.html")
 

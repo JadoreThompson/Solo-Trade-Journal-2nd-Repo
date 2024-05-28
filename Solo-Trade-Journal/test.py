@@ -16,8 +16,7 @@ header = {
 }
 
 
-password = "dog"
-if len(password) > 5:
-    print(len(password))
-else:
-    print("gone")
+endpoint = "analyses/1069986"
+url = base_url + endpoint
+response = requests.get(url, headers=header)
+print(response.json())
