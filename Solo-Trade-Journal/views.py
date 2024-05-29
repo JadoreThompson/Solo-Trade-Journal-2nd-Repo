@@ -4,6 +4,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import base64
 import requests
 from models import Users, TradingAccounts, CopyTrading, db
+from datetime import datetime, timedelta, timezone
+from dateutil import parser
 
 #   Creating a blueprint ( area for all the routes )
 views = Blueprint("views", __name__)
@@ -177,12 +179,58 @@ def dashboard(account_id):
         if item['account_name'] == account.name:
             found = True
             found_item = item
+            print("Account found", found_item)
+
+    tradesync_account_id = found_item['id']
+    endpoint = f"analyses/{tradesync_account_id}"
+    url = base_url + endpoint
+    response = requests.get(url, headers=header)
+    data = response.json()
+
+    # Working out 7d pnl
+    current_date = datetime.now(timezone.utc)
+    one_week_ago = current_date - timedelta(days=7)
+
+    # Getting all trades
+    endpoint = "trades"
+    url = base_url + endpoint
+    response = requests.get(url, headers=header)
+    data = response.json()
+
+    last_weeks_trades = []
+    last_weeks_profit_num = 0
+    week_before_last_trades = []
+    week_before_last_profit_num = 0
+    two_weeks_ago = one_week_ago - timedelta(days=7)
+
+    for trade in data['data']:
+        parsed_datetime = parser.isoparse(trade['open_time'])
+        if parsed_datetime > one_week_ago:
+            last_weeks_trades.append(trade)
+            last_weeks_profit_num += trade['profit']
+        elif parsed_datetime > two_weeks_ago:
+            week_before_last_trades.append(trade)
+            week_before_last_profit_num += trade['profit']
+
+    if last_weeks_profit_num < 0:
+        last_weeks_profit = f"-${str(last_weeks_profit_num)}"
+    else:
+        last_weeks_profit = f"+${str(last_weeks_profit_num)}"
+
+    if week_before_last_profit_num < 0:
+        week_before_last_profit = f"-${str(week_before_last_profit_num)}"
+    else:
+        week_before_last_profit = f"+${str(week_before_last_profit_num)}"
+
+    profit_difference = last_weeks_profit_num - week_before_last_profit_num
+    if profit_difference < 0:
+        profit_difference = f"-${str(profit_difference)}"
+    else:
+        profit_difference = f"+${str(profit_difference)}"
+    # End of getting 7d pnl
 
 
-
-
-
-    return render_template("dashboard.html")
+    return render_template("dashboard.html", last_weeks_profit=last_weeks_profit, profit_difference=profit_difference)
 
 
 @views.route("/analysis")
