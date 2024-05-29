@@ -6,6 +6,9 @@ import requests
 from models import Users, TradingAccounts, CopyTrading, db
 from datetime import datetime, timedelta, timezone
 from dateutil import parser
+import math
+import pprint
+import json
 
 #   Creating a blueprint ( area for all the routes )
 views = Blueprint("views", __name__)
@@ -229,8 +232,58 @@ def dashboard(account_id):
         profit_difference = f"+${str(profit_difference)}"
     # End of getting 7d pnl
 
+    # Getting balance of the account
+    endpoint = f"accounts/{tradesync_account_id}"
+    url = base_url + endpoint
+    response = requests.get(url, headers=header)
 
-    return render_template("dashboard.html", last_weeks_profit=last_weeks_profit, profit_difference=profit_difference)
+    data = response.json()
+    data = data['data']
+    balance = math.ceil(data['balance'] - data['total_profit'])
+    session['balance'] = balance
+    # End of getting balance of the account
+
+    # Getting 7d growth percentage
+    last_weeks_profit_percentage_int = round(data['total_profit'] / data['balance'] * 100, 2)
+    if last_weeks_profit_percentage_int < 0:
+        last_weeks_profit_percentage = f"-{str(last_weeks_profit_percentage_int)}%"
+    if last_weeks_profit_percentage_int > 0:
+        last_weeks_profit_percentage = f"+{str(last_weeks_profit_percentage_int)}%"
+    # End of getting 7d growth percentage
+
+    # Getting all trades to put into table
+    endpoint = "trades"
+    url = base_url + endpoint
+    response = requests.get(url, headers=header)
+    data = response.json()
+
+    trades_list = []
+    for trade in data['data']:
+        if trade['account_id'] == 1071483 and trade['type'] != 'deposit':
+            trades_list.append(trade)
+    # End getting all trades to put into table
+
+    # Getting monthly growth to pass into dashboard chart
+    endpoint = f"analyses/{tradesync_account_id}/monthlies"
+    url = base_url + endpoint
+    response = requests.get(url, headers=header)
+    data = response.json()
+    data = data['data']
+    print("Monthly Growth: ", data)
+    monthly_growth = {}
+    for trade in data:
+        growth = round(trade['growth'] / session['balance'] * 100, 2)
+        monthly_growth[trade['date']] = growth
+    print("Monthly Growth: ", monthly_growth)
+
+    json_data = json.dumps(monthly_growth)
+
+
+
+    return render_template("dashboard.html", last_weeks_profit=last_weeks_profit,
+                           profit_difference=profit_difference, balance=balance,
+                           last_weeks_profit_percentage=last_weeks_profit_percentage,
+                           trades_list=trades_list, json_data=json_data)
 
 
 @views.route("/analysis")

@@ -13,7 +13,7 @@
           rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
           crossorigin="anonymous">
 
-    <title>Document</title>
+    <title>Dashboard</title>
 </head>
 <body>
     <!--
@@ -69,12 +69,11 @@
             </div>
             <div class="small-stat">
                 <h4>7d Growth</h4>
-                <p>+1.7%</p>
-                <span>+1% from last week</span>
+                <p>{{ last_weeks_profit_percentage }}</p>
             </div>
             <div class="small-stat">
                 <h4>Account Value</h4>
-                <p>$1000</p>
+                <p>{{ balance }}</p>
             </div>
         </div>
         <div class="chart-container">
@@ -88,31 +87,24 @@
                 <table>
                     <thead>
                     <tr>
-                        <th>Day</th>
-                        <th>Time</th>
+                        <th>Open Time</th>
+                        <th>Close Time</th>
+                        <th>Symbol</th>
                         <th>Type</th>
+                        <th>Lots</th>
                         <th>Outcome</th>
                     </tr>
                     </thead>
                     <tbody>
+                    {% for trade in trades_list %}
                     <tr>
-                        <td>Monday</td>
-                        <td>12:00</td>
-                        <td>Buy</td>
-                        <td>+$50</td>
-                    </tr>
-                    <tr>
-                        <td>Monday</td>
-                        <td>12:00</td>
-                        <td>Buy</td>
-                        <td>+$50</td>
-                    </tr>
-                    <tr>
-                        <td>Monday</td>
-                        <td>12:00</td>
-                        <td>Buy</td>
-                        <td>+$50</td>
-                    </tr>
+                        <td>{{ trade.open_time }}</td>
+                        <td>{{ trade.close_time }}</td>
+                        <th>{{ trade.symbol }}</th>
+                        <td>{{ trade.type }}</td>
+                        <td>{{ trade.lots }}</td>
+                        <td>{{ trade.profit }}</td>
+                    {% endfor %}
                     </tbody>
                 </table>
             </div>
@@ -185,20 +177,13 @@
 
     <script>
         const chartContainer = document.getElementById('container')
+        const monthlyGrowth = JSON.parse('{{ json_data | safe }}')
+        const dataPoints = Object.entries(monthlyGrowth).map(([time, value]) => ({ time, value }));
+
         const chart = LightweightCharts.createChart(chartContainer, {width: chartContainer.clientWidth, height: chartContainer.clientHeight});
         const lineSeries = chart.addLineSeries();
-        lineSeries.setData([
-            { time: '2019-04-11', value: 80.01 },
-            { time: '2019-04-12', value: 96.63 },
-            { time: '2019-04-13', value: 76.64 },
-            { time: '2019-04-14', value: 81.89 },
-            { time: '2019-04-15', value: 74.43 },
-            { time: '2019-04-16', value: 80.01 },
-            { time: '2019-04-17', value: 96.63 },
-            { time: '2019-04-18', value: 76.64 },
-            { time: '2019-04-19', value: 81.89 },
-            { time: '2019-04-20', value: 74.43 },
-        ]);
+        lineSeries.setData(dataPoints);
+
     </script>
 </body>
 </html>
