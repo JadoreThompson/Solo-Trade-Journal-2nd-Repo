@@ -64,7 +64,7 @@
         <div class="small-stats">
             <div class="small-stat">
                 <h4>7d PNL</h4>
-                <p>{{ last_weeks_profit }}</p>
+                <p>{{ weekly_profit }}</p>
                 <span>{{ profit_difference }}</span>
             </div>
             <div class="small-stat">
@@ -83,7 +83,7 @@
         </div>
         <div class="order-table">
             <h4>All Trades</h4>
-            <div class="table-container">
+            <div class="table-container" style="overflow-x: auto;">
                 <table>
                     <thead>
                     <tr>
@@ -171,6 +171,10 @@
                 justify-content: space-between;
                 width: 100%;
                 max-width: 100%;
+            }
+
+            th, td {
+                padding: 8px;
             }
         </style>
     </div>

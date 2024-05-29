@@ -5,7 +5,7 @@
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
+    <title>Accounts</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
@@ -46,7 +46,7 @@
                 <thead>
                 <tr>
                     <th>Name</th>
-                    <th>% Gain</th>
+                    <th>Option</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -54,6 +54,25 @@
                 <tr>
                     <td>
                         <a href="{{ url_for('views.dashboard',account_id=account.id)}}">{{ account.name }}</a>
+                    </td>
+                    <td>
+                        <button>
+                            <a href="{{ url_for('views.delete_account', account_id=account.id)}}">Delete</a>
+                        </button>
+                        <style>
+                            td button {
+                                background-color: blue;
+                                color: white;
+                                padding: 5px;
+                                border-radius: 5px;
+                                border: none;
+                            }
+
+                            button a{
+                                color: white;
+                                text-decoration: none;
+                            }
+                        </style>
                     </td>
                 </tr>
                 {% endfor %}
@@ -105,15 +124,23 @@
                     </div>
                     <div class="form-element">
                         <label for="mt-version">MT-Version</label><br>
-                        <input type="number" name="mt-version" id="mt-version" placeholder="4 or 5">
+                        <input type="number" name="mt-version" id="mt-version" placeholder="5 or 4">
                     </div>
                     <div class="form-element">
                         <label for="broker">Broker</label><br>
-                        <input type="text" name="broker" id="broker" placeholder="IC Markets">
+                        <select name="broker" id="broker">
+                            {% for broker in all_brokers %}
+                            <option value="{{ broker.id }}">{{ broker.name }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
                     <div class="form-element">
                         <label for="broker-server">Broker Server</label><br>
-                        <input type="text" name="broker-server" id="broker-server" placeholder="ICMarketsSC-Live01">
+                        <select name="broker-server" id="broker-server">
+                            {% for server in all_servers %}
+                            <option value="{{ server.id }}">{{ server.name }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
                     <button type="submit">Submit</button>
                 </form>
@@ -243,6 +270,11 @@
             background-color: blue;
             color: white;
         }
+
+        select {
+            width: 100%;
+            max-width: 100%;
+        }
     </style>
 
     <script>
@@ -305,6 +337,34 @@
         window.addEventListener('resize', () => {
           const chartContainer = document.getElementById('chart');
           chart.resize(chartContainer.clientWidth, chartContainer.clientHeight);
+        });
+
+        // Assuming broker_servers is an array of all servers
+        // and all_brokers is an array of all brokers, both in the format:
+        // [{id: 1, name: 'Server 1', broker_id: 1}, {id: 2, name: 'Server 2', broker_id: 2}, ...]
+
+        // Get the select boxes
+        const brokerSelect = document.getElementById('broker');
+        const serverSelect = document.getElementById('broker-server');
+
+        // Add an event listener to the broker select box
+        brokerSelect.addEventListener('change', function() {
+            // Get the selected broker's ID
+            const selectedBrokerId = this.value;
+
+            // Filter the servers to get the ones that match the selected broker
+            const matchingServers = broker_servers.filter(server => server.broker_id == selectedBrokerId);
+
+            // Clear the current options in the server select box
+            serverSelect.innerHTML = '';
+
+            // Create new option elements for each matching server
+            matchingServers.forEach(server => {
+                const option = document.createElement('option');
+                option.value = server.id;
+                option.textContent = server.name;
+                serverSelect.appendChild(option);
+            });
         });
     </script>
 </body>

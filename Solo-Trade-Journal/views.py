@@ -87,203 +87,157 @@ def login():
 
 @views.route("/accounts", methods=["POST", "GET"])
 def accounts():
-    if 'user_id' not in session:
-        return redirect(url_for("views.login"))
-    else:
-        u = session['user_id']
-        print("User ID: ", u)
-        if request.method == "POST":
 
-            #   Grabbing account credentials
-            name = request.form.get("name")
-            account_login = request.form.get("account-login")
-            password = request.form.get("password")
-            broker = request.form.get("broker")
-            broker_server = request.form.get("broker-server")
-            mt_version = request.form.get("mt-version")
-            print("Add account credentials: ", name, account_login, password, broker, broker_server, mt_version)
+    def get_brokers():
+        endpoint = "brokers"
+        url = base_url + endpoint
+        response = requests.get(url, headers=header)
+        data = response.json()
+        data = data['data']
 
-            #   Getting broker server id for account creation
-            endpoint = "broker-servers"
+        all_brokers = []
+        for broker in data:
+            all_brokers.append(broker)
+        return all_brokers
+    def get_broker_servers():
+        endpoint = "broker-servers"
+        url = base_url + endpoint
+        response = requests.get(url, headers=header)
+        data = response.json()
+        data = data['data']
+
+        all_broker_servers = []
+        for broker_server in data:
+            all_broker_servers.append(broker_server)
+
+        return all_broker_servers
+
+    if request.method == "POST":
+
+        trading_name = request.form.get("name")
+        trading_number = request.form.get("account-login")
+        trading_password = request.form.get("password")
+        mt_version = request.form.get("mt-version")
+        trading_broker = request.form.get("broker")
+        trading_server = request.form.get("broker-server")
+
+        """
+        print("Trading Name: ", trading_name)
+        print("Trading Number: ", trading_number)
+        print("Trading Password: ", trading_password)
+        print("MT Version: ", mt_version)
+        print("Trading Broker: ", trading_broker)
+        print("Trading Server: ", trading_server)
+        """
+
+        def create_account():
+            endpoint = "accounts"
             url = base_url + endpoint
-            body = {
-                'mt_version': mt_version,
+            data = {
+                "account_name": trading_name,
+                "account_number": trading_number,
+                "password": trading_password,
+                "mt_version": mt_version,
+                "broker_id": trading_broker,
+                "broker_server_id": trading_server
             }
-            response = requests.get(url, headers=header, json=body)
-            data = response.json()
-            data = data['data']
-            print("Broker Servers: ", data)
+            response = requests.post(url, headers=header, json=data)
+            print("Response: ", response.json())
+            return response.json()
 
-            found = False
-            for item in data:
-                if item['name'] == broker_server:
-                    found = True
-                    print("found")
-                    found_item = item
+        data = create_account()
+        if data['status'] == 200:
+            new_account = TradingAccounts(user_id=session['user_id'], name=trading_name,
+                                          account_number=trading_number)
+            db.session.add(new_account)
+            db.session.commit()
 
-
-            if found:
-                broker_server_id = found_item['broker_id']
-                print("Broker found", found_item,'\n' "Broker Server ID", broker_server_id)
-
-                #   Add account to database
-                endpoint = "accounts"
-                url = base_url + endpoint
-                body = {
-                    "account_name": name,
-                    "mt_version": mt_version,
-                    "account_number": account_login,
-                    "password": password,
-                    "broker_server_id": broker_server_id
-                }
-                response = requests.post(url, headers=header, json=body)
-                data = response.json()
-                print("Account Creation Response ", data)
-
-                if response.status_code == 200:
-                    account = TradingAccounts(name=name, account_login=account_login, password=password, broker=broker, broker_server=broker_server, mt_version=mt_version, user_id=session['user_id'])
-                    db.session.add(account)
-                    db.session.commit()
-                    return redirect(url_for("views.accounts"))
-            else:
-                error = True
-                print("No broker found")
-                error_message = "Broker server not found"
-                return render_template("accounts.html", error=error, error_message=error_message)
+            return redirect(url_for("views.accounts"))
 
 
-    #   Loading all the user's accounts
     accounts = TradingAccounts.query.filter_by(user_id=session['user_id']).all()
-    return render_template("accounts.html", accounts=accounts)
+    return render_template("accounts.html", all_brokers=get_brokers(),
+                           all_servers=get_broker_servers(), accounts=accounts)
+
+
 
 @views.route("/dashboard/<int:account_id>")
 def dashboard(account_id):
-    session['account_id'] = account_id
-    if 'user_id' not in session:
-        return redirect(url_for("views.login"))
-    if 'account_id' not in session:
-        return redirect(url_for("views.accounts"))
 
-    #   Use session id to get account name
-    print("Session ID: ", session['account_id'])
-    account = TradingAccounts.query.filter_by(user_id=session['user_id'], id=session['account_id']).first()
-    print("Account Name: ", account.name)
+    def get_trading_account_id(account_id):
+        account = TradingAccounts.query.filter_by(id=account_id).first()
+        return account.account_number
 
-    #   Using name as the identifier
-    endpoint = "accounts"
-    url = base_url + endpoint
-    response = requests.get(url, headers=header)
-    data = response.json()
-    print(data)
+    def get_acc_pnl(tradesync_acc_id):
+        print("TradeSync Account ID: ", tradesync_acc_id)
 
-    data = data['data']
-    found = False
-    for item in data:
-        if item['account_name'] == account.name:
-            found = True
-            found_item = item
-            print("Account found", found_item)
+        endpoint = "accounts"
+        url = base_url + endpoint
+        response = requests.get(url, headers=header)
+        data = response.json()
+        data = data['data']
+        print("Account Data: ", data)
 
-    tradesync_account_id = found_item['id']
-    endpoint = f"analyses/{tradesync_account_id}"
-    url = base_url + endpoint
-    response = requests.get(url, headers=header)
-    data = response.json()
+        for account in data:
+            if account['account_number'] == tradesync_acc_id:
+                return account
 
-    # Working out 7d pnl
-    current_date = datetime.now(timezone.utc)
-    one_week_ago = current_date - timedelta(days=7)
+    def get_trades(tradesync_account_id):
+        endpoint = "accounts"
+        url = base_url + endpoint
+        response = requests.get(url, headers=header)
+        data = response.json()
+        data = data['data']
 
-    # Getting all trades
-    endpoint = "trades"
-    url = base_url + endpoint
-    response = requests.get(url, headers=header)
-    data = response.json()
+        for account in data:
+            if account['account_number'] == tradesync_account_id:
+                ts_account = account
 
-    last_weeks_trades = []
-    last_weeks_profit_num = 0
-    week_before_last_trades = []
-    week_before_last_profit_num = 0
-    two_weeks_ago = one_week_ago - timedelta(days=7)
+        ts_account_id = ts_account['id']
+        session['tradesync_acc_id'] = ts_account_id
 
-    for trade in data['data']:
-        parsed_datetime = parser.isoparse(trade['open_time'])
-        if parsed_datetime > one_week_ago:
-            last_weeks_trades.append(trade)
-            last_weeks_profit_num += trade['profit']
-        elif parsed_datetime > two_weeks_ago:
-            week_before_last_trades.append(trade)
-            week_before_last_profit_num += trade['profit']
+        endpoint = "trades"
+        url = base_url + endpoint
+        response = requests.get(url, headers=header)
+        data = response.json()
+        data = data['data']
 
-    if last_weeks_profit_num < 0:
-        last_weeks_profit = f"-${str(last_weeks_profit_num)}"
-    else:
-        last_weeks_profit = f"+${str(last_weeks_profit_num)}"
+        trades_list = []
+        for trade in data:
+            if trade['account_id'] == ts_account_id:
+                trades_list.append(trade)
 
-    if week_before_last_profit_num < 0:
-        week_before_last_profit = f"-${str(week_before_last_profit_num)}"
-    else:
-        week_before_last_profit = f"+${str(week_before_last_profit_num)}"
+        return trades_list
 
-    profit_difference = last_weeks_profit_num - week_before_last_profit_num
-    if profit_difference < 0:
-        profit_difference = f"-${str(profit_difference)}"
-    else:
-        profit_difference = f"+${str(profit_difference)}"
-    # End of getting 7d pnl
+    def get_monthly_growth(tradesync_account_id):
+        endpoint = f"analyses/{tradesync_account_id}/monthlies"
+        url = base_url + endpoint
+        response = requests.get(url, headers=header)
+        data = response.json()
+        return data['data']
 
-    # Getting balance of the account
-    endpoint = f"accounts/{tradesync_account_id}"
-    url = base_url + endpoint
-    response = requests.get(url, headers=header)
 
-    data = response.json()
-    data = data['data']
-    balance = math.ceil(data['balance'] - data['total_profit'])
-    session['balance'] = balance
-    # End of getting balance of the account
 
-    # Getting 7d growth percentage
-    last_weeks_profit_percentage_int = round(data['total_profit'] / data['balance'] * 100, 2)
-    if last_weeks_profit_percentage_int < 0:
-        last_weeks_profit_percentage = f"-{str(last_weeks_profit_percentage_int)}%"
-    if last_weeks_profit_percentage_int > 0:
-        last_weeks_profit_percentage = f"+{str(last_weeks_profit_percentage_int)}%"
-    # End of getting 7d growth percentage
+    tradesync_account_id = int(get_trading_account_id(account_id))
+    session['tradesync_acc_number'] = tradesync_account_id
 
-    # Getting all trades to put into table
-    endpoint = "trades"
-    url = base_url + endpoint
-    response = requests.get(url, headers=header)
-    data = response.json()
+    # Top row variables
+    acc_dict = get_acc_pnl(tradesync_account_id)
+    weekly_profit = acc_dict['weekly_profit']
+    monthly_profit = acc_dict['monthly_profit']
+    balance = acc_dict['equity']
 
-    trades_list = []
-    for trade in data['data']:
-        if trade['account_id'] == 1071483 and trade['type'] != 'deposit':
-            trades_list.append(trade)
-    # End getting all trades to put into table
-
-    # Getting monthly growth to pass into dashboard chart
-    endpoint = f"analyses/{tradesync_account_id}/monthlies"
-    url = base_url + endpoint
-    response = requests.get(url, headers=header)
-    data = response.json()
-    data = data['data']
-    print("Monthly Growth: ", data)
-    monthly_growth = {}
-    for trade in data:
-        growth = round(trade['growth'] / session['balance'] * 100, 2)
-        monthly_growth[trade['date']] = growth
-    print("Monthly Growth: ", monthly_growth)
-
+    # Chart data
+    monthly_growth = get_monthly_growth(session['tradesync_acc_id'])
     json_data = json.dumps(monthly_growth)
 
+    # Trades Table
+    trades_list = get_trades(tradesync_account_id)
 
 
-    return render_template("dashboard.html", last_weeks_profit=last_weeks_profit,
-                           profit_difference=profit_difference, balance=balance,
-                           last_weeks_profit_percentage=last_weeks_profit_percentage,
-                           trades_list=trades_list, json_data=json_data)
+
+    return render_template("dashboard.html", weekly_profit=weekly_profit, monthly_profit=monthly_profit
+                           , balance=balance, trades_list=trades_list, json_data=json_data)
 
 
 @views.route("/analysis")
@@ -305,3 +259,16 @@ def analysis():
 @views.route("/copytrading")
 def copytrading():
     return render_template("copytrading.html")
+
+@views.route("/delete-account/<int:account_id>")
+def delete_account(account_id):
+    account = TradingAccounts.query.filter_by(id=account_id).first()
+    db.session.delete(account)
+    db.session.commit()
+
+    endpoint = f"accounts/{account_id}"
+    url = base_url + endpoint
+    response = requests.delete(url, headers=header)
+    print("Delete Response:", response.json())
+
+    return redirect(url_for("views.accounts"))

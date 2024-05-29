@@ -21,13 +21,17 @@ header = {
 
 
 # Getting monthly growth to pass into dashboard chart
-account_id = 1071483
-endpoint = f"analyses/{account_id}/monthlies"
+
+tradesync_account_id = 1071850
+
+endpoint = f"analyses/{tradesync_account_id}/monthlies"
 url = base_url + endpoint
+
 response = requests.get(url, headers=header)
 data = response.json()
-data = data['data']
 pprint(data)
+
+
 
 
 

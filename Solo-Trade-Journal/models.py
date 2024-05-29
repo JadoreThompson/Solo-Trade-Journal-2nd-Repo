@@ -12,11 +12,7 @@ class TradingAccounts(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     name = db.Column(db.String, nullable=False)
-    account_login = db.Column(db.String, nullable=False)
-    password = db.Column(db.String, nullable=False)
-    broker = db.Column(db.String, nullable=False)
-    broker_server = db.Column(db.String, nullable=False)
-    mt_version = db.Column(db.Integer, nullable=False)
+    account_number = db.Column(db.String, unique=True, nullable=False)
     user = db.relationship('Users', backref=db.backref('trading_accounts', lazy=True))
 
 class CopyTrading(db.Model):
