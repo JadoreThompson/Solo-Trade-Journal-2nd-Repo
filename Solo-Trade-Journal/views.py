@@ -9,6 +9,8 @@ from dateutil import parser
 import math
 import pprint
 import json
+from dotenv import load_dotenv
+import os
 
 #   Creating a blueprint ( area for all the routes )
 views = Blueprint("views", __name__)
@@ -16,8 +18,10 @@ views = Blueprint("views", __name__)
 # TradeSync API
 base_url = "https://api.tradesync.io/"
 
-apikey = 'kcsiJZvwfGX81Rw9op2a'
-secretkey = 'RjvCNYNjrsiwwUvkFBXG'
+load_dotenv('.env')
+apikey: str = os.getenv('API_KEY')
+secretkey: str = os.getenv('SECRET_KEY')
+
 credentials = f"{apikey}:{secretkey}"
 
 encoded = base64.b64encode(credentials.encode()).decode()

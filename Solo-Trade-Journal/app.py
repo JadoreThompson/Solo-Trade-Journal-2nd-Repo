@@ -2,6 +2,9 @@ from flask import Flask
 from views import views
 from flask_sqlalchemy import SQLAlchemy
 from models import db
+from dotenv import load_dotenv
+import os
+
 
 
 #   Flask Configuration ( initialising the application context )
