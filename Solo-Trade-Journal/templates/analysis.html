@@ -56,16 +56,16 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for trade in trades %}
+                        {% for trade in trades_list %}
                         <tr>
-                            <td>{{ trade.tags }}</td>
-                            <td>{{ trade.day }}</td>
-                            <td>{{ trade.open_time }}</td>
-                            <td>{{ trade.symbol }}</td>
-                            <td>{{ trade.type }}</td>
-                            <td>{{ trade.lots }}</td>
-                            <td>{{ trade.rr }}</td>
-                            <td>{{ trade.outcome }}</td>
+                            <td>{{ trades_list.tags }}</td>
+                            <td>{{ trades_list.day }}</td>
+                            <td>{{ trades_list.open_time }}</td>
+                            <td>{{ trades_list.symbol }}</td>
+                            <td>{{ trades_list.type }}</td>
+                            <td>{{ trades_list.lots }}</td>
+                            <td>{{ trades_list.rr }}</td>
+                            <td>{{ trades_list.outcome }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>

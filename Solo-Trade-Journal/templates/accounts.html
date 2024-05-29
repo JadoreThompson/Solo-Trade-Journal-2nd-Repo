@@ -80,7 +80,7 @@
             </table>
         </div>
         <div class="chart-card">
-            <div id="container" style="width: 100%; height: 100% margin: 0; padding: 0;">
+            <div id="container">
             </div>
         </div>
 
@@ -193,13 +193,7 @@
             text-decoration: underline;
         }
 
-        #container {
-            border-radius: 20px;
-            margin-top: 10px;
-            min-height: 600px;
-            border: 1px solid black;
-            background-color: white;
-        }
+
 
         #addAccount {
             border-radius: 20px;
@@ -291,81 +285,6 @@
             }
         }
 
-        // Create the chart
-        const chart = LightweightCharts.createChart(document.getElementById('chart'), {
-          width: 600,
-          height: 400,
-          layout: {
-            backgroundColor: '#ffffff',
-            textColor: '#333',
-          },
-          grid: {
-            vertLines: {
-              color: '#e1e1e1',
-            },
-            horzLines: {
-              color: '#e1e1e1',
-            },
-          },
-          crosshair: {
-            mode: LightweightCharts.CrosshairMode.Normal,
-          },
-          rightPriceScale: {
-            borderColor: '#ccc',
-          },
-          timeScale: {
-            borderColor: '#ccc',
-          },
-        });
-
-        // Add a line series to the chart
-        const lineSeries = chart.addLineSeries({
-          color: 'rgba(0, 150, 136, 1)',
-          lineWidth: 2,
-        });
-
-        // Set the data for the line series
-        lineSeries.setData([
-          { time: '2023-01-01', value: 50 },
-          { time: '2023-01-02', value: 55 },
-          { time: '2023-01-03', value: 60 },
-          { time: '2023-01-04', value: 58 },
-          { time: '2023-01-05', value: 63 },
-        ]);
-
-        // Optional: handle window resize to keep the chart responsive
-        window.addEventListener('resize', () => {
-          const chartContainer = document.getElementById('chart');
-          chart.resize(chartContainer.clientWidth, chartContainer.clientHeight);
-        });
-
-        // Assuming broker_servers is an array of all servers
-        // and all_brokers is an array of all brokers, both in the format:
-        // [{id: 1, name: 'Server 1', broker_id: 1}, {id: 2, name: 'Server 2', broker_id: 2}, ...]
-
-        // Get the select boxes
-        const brokerSelect = document.getElementById('broker');
-        const serverSelect = document.getElementById('broker-server');
-
-        // Add an event listener to the broker select box
-        brokerSelect.addEventListener('change', function() {
-            // Get the selected broker's ID
-            const selectedBrokerId = this.value;
-
-            // Filter the servers to get the ones that match the selected broker
-            const matchingServers = broker_servers.filter(server => server.broker_id == selectedBrokerId);
-
-            // Clear the current options in the server select box
-            serverSelect.innerHTML = '';
-
-            // Create new option elements for each matching server
-            matchingServers.forEach(server => {
-                const option = document.createElement('option');
-                option.value = server.id;
-                option.textContent = server.name;
-                serverSelect.appendChild(option);
-            });
-        });
     </script>
 </body>
 </html>

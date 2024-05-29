@@ -3,6 +3,54 @@
 {% block title %}Home{% endblock %}
 
 {% block content %}
-    <h1>Welcome to Solo Trade Journal</h1>
-    <p>Log-in or Sign-up to get started</p>
+<div class="container">
+    <div class="card">
+        <h2>Welcome to Solo Journal the key to your trading success</h2>
+        <div class="buttons">
+            <button>
+                <a href="/signup">Get Started</a>
+            </button>
+            <button>
+                <a href="/login">Log In</a>
+            </button>
+        </div>
+    </div>
+</div>
+<style>
+
+    .container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        height: 80vh; /* Full height of the viewport */
+    }
+
+    .card {
+        padding: 10px;
+        border: none;
+    }
+
+    .buttons {
+        display: grid;
+        padding-top: 20px;
+        justify-content: center;
+        gap: 0.5rem;
+        grid-template-columns:
+            repeat(auto-fit, minmax(100px, 1fr));
+    }
+
+    .buttons button {
+        border: none;
+        border-radius: 5px;
+        background-color: blue;
+        color: white;
+    }
+
+    button a {
+        text-decoration: none;
+        color: white;
+        box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+</style>
 {% endblock %}

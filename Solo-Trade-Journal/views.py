@@ -165,6 +165,7 @@ def accounts():
 def dashboard(account_id):
 
     def get_trading_account_id(account_id):
+        session['account_id'] = account_id
         account = TradingAccounts.query.filter_by(id=account_id).first()
         return account.account_number
 
@@ -233,6 +234,7 @@ def dashboard(account_id):
 
     # Trades Table
     trades_list = get_trades(tradesync_account_id)
+    session['trades_list'] = trades_list
 
 
 
@@ -240,19 +242,47 @@ def dashboard(account_id):
                            , balance=balance, trades_list=trades_list, json_data=json_data)
 
 
-@views.route("/analysis")
-def analysis():
-    if 'user_id' not in session:
-        return redirect(url_for("views.login"))
-    if 'account_id' not in session:
-        return redirect(url_for("views.accounts"))
+@views.route("/dashboard/<int:account_id>/analysis")
+def analysis(account_id):
 
-    account = TradingAccounts.query.filter_by(user_id=session['user_id'], id=session['account_id']).first()
-    print("Account Name: ", account.name)
+    account_id = session['account_id']
+    def get_trading_account_id(account_id):
+        session['account_id'] = account_id
+        account = TradingAccounts.query.filter_by(id=account_id).first()
+        return account.account_number
 
-    trades_list = {
+    def get_trades(tradesync_account_id):
+        endpoint = "accounts"
+        url = base_url + endpoint
+        response = requests.get(url, headers=header)
+        data = response.json()
+        data = data['data']
 
-    }
+        for account in data:
+            if account['account_number'] == tradesync_account_id:
+                ts_account = account
+
+        ts_account_id = ts_account['id']
+        session['tradesync_acc_id'] = ts_account_id
+
+        endpoint = "trades"
+        url = base_url + endpoint
+        response = requests.get(url, headers=header)
+        data = response.json()
+        data = data['data']
+
+        trades_list = []
+        for trade in data:
+            if trade['account_id'] == ts_account_id:
+                trades_list.append(trade)
+
+        return trades_list
+
+
+    tradesync_account_id = int(get_trading_account_id(account_id))
+    trades_list = get_trades(session['tradesync_acc_number'])
+    print("Trades List: ", trades_list)
+
     return render_template("analysis.html")
 
 
@@ -265,6 +295,8 @@ def delete_account(account_id):
     account = TradingAccounts.query.filter_by(id=account_id).first()
     db.session.delete(account)
     db.session.commit()
+
+    account_id = session['tradesync_acc_id']
 
     endpoint = f"accounts/{account_id}"
     url = base_url + endpoint
